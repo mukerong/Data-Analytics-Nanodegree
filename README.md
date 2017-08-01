@@ -1,1 +1,8 @@
 # Udacity-Nanodegree
+
+> Place to show what I have learnt from Udacity Data Analysis Nanodegree
+
+## Introduction
+
+I am a CPA with two-year experience in public accounting. I am paasionate about data analysis and technology. I am learning data analytics in Udacity Nanodegree. I have learned almost every aspect of data science. This is a repository that holds my quizes. [Projects](https://github.com/rachelfu/Data-Science-Project) and [notes](https://github.com/rachelfu/Toolkit) are in another repository.
+
