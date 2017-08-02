@@ -1,4 +1,4 @@
-# Udacity-Nanodegree
+# Udacity Data Analysis Nanodegree
 
 > Place to show what I have learnt from Udacity Data Analysis Nanodegree
 
