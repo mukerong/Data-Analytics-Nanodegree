@@ -35,7 +35,7 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
 
 
 # write the generated elements into sample.osm file
-k = 1000  # We will extract 1/k of the original file
+k = 100  # We will extract 1/k of the original file
 with open(sample_file, 'wb') as output:
     output.write(bytes('<?xml version="1.0" encoding="UTF-8"?>\n', 'UTF-8'))
     output.write(bytes('<osm>\n  ', 'UTF-8'))
