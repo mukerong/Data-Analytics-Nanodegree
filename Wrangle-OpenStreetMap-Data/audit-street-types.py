@@ -7,7 +7,7 @@ expected = ['Street', 'Avenue', 'Boulevard', 'Drive', 'Court', 'Place',
             'Square', 'Lane', 'Road', 'Trail', 'Parkway', 'Commons']
 
 
-def audit_street_types(street_types, street_name):
+def audit_street_types(filename):
     street_types = defaultdict(set)
 
     for event, element in ET.iterparse(filename, event=(start,)):
