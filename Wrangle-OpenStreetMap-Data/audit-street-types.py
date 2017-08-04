@@ -10,7 +10,7 @@ expected = ['Street', 'Avenue', 'Boulevard', 'Drive', 'Court', 'Place',
 def audit_street_types(filename):
     street_types = defaultdict(set)
 
-    for event, element in ET.iterparse(filename, event=(start,)):
+    for event, element in ET.iterparse(filename, events=('start',)):
         if element.tag == 'node' or element.tag == 'way':
             for tag in element.iter('tag'):
                 if tag.attrib['k'] == 'addr:street':
