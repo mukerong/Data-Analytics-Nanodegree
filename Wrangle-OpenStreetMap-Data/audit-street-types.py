@@ -7,17 +7,17 @@ expected = ['Street', 'Avenue', 'Boulevard', 'Drive', 'Court', 'Place',
             'Square', 'Lane', 'Road', 'Trail', 'Parkway', 'Commons']
 
 
-def audit_street_types(filename):
-    street_types = defaultdict(set)
+def v_attrib_types(filename, k_value, pattern):
+    types = defaultdict(set)
 
     for event, element in ET.iterparse(filename, events=('start',)):
         if element.tag == 'node' or element.tag == 'way':
             for tag in element.iter('tag'):
-                if tag.attrib['k'] == 'addr:street':
-                    street_name = tag.attrib['v']
-                    search = street_type_re.search(street_name)
+                if tag.attrib['k'] == k_vlaue:
+                    v_value = tag.attrib['v']
+                    search = pattern.search(v_value)
                     if search:
-                        street_type = search.group(0)
-                        if street_type not in expected:
-                            street_types[street_type].add(street_name)
-    return street_types
+                        v_type = search.group(0)
+                        if v_type not in expected:
+                            types[v_type].add(v_value)
+    return types
