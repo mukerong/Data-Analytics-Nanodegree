@@ -17,6 +17,10 @@ def v_attrib_types(filename, k_attrib_value, pattern):
     filename (.xml or .osm): The file that is going to be parsed.
     k_attrib_value (str): The k attribute value you are looking for.
     pattern (re): The regex pattern used to categorize the k attribute value
+
+    Return
+    ---
+    A dictionary conatains the category of the k values.
     '''
     types = defaultdict(set)
 
