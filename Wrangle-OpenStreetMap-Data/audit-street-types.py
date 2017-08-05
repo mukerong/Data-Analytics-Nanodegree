@@ -2,12 +2,8 @@ import re
 from collections import defaultdict
 import xml.etree.cElementTree as ET
 
-street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
-expected = ['Street', 'Avenue', 'Boulevard', 'Drive', 'Court', 'Place',
-            'Square', 'Lane', 'Road', 'Trail', 'Parkway', 'Commons']
 
-
-def v_attrib_types(filename, k_attrib_value, pattern):
+def v_attrib_types(filename, k_attrib_value, pattern, expected):
     '''
     This function will seperate the k attribute value based on their patterns
     within a .osm file.
@@ -17,6 +13,7 @@ def v_attrib_types(filename, k_attrib_value, pattern):
     filename (.xml or .osm): The file that is going to be parsed.
     k_attrib_value (str): The k attribute value you are looking for.
     pattern (re): The regex pattern used to categorize the k attribute value
+    expected (list or re): the expected value list or pattern
 
     Return
     ---
@@ -32,6 +29,11 @@ def v_attrib_types(filename, k_attrib_value, pattern):
                     search = pattern.search(v_value)
                     if search:
                         v_type = search.group(0)
-                        if v_type not in expected:
-                            types[v_type].add(v_value)
+                        try:
+                            if v_type not in expected:
+                                types[v_type].add(v_value)
+                        except:
+                            if not expected.search(v_type):
+                                types[v_type].add(v_value)
+
     return types
