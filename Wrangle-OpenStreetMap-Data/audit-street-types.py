@@ -13,7 +13,7 @@ def v_attrib_types(filename, k_value, pattern):
     for event, element in ET.iterparse(filename, events=('start',)):
         if element.tag == 'node' or element.tag == 'way':
             for tag in element.iter('tag'):
-                if tag.attrib['k'] == k_vlaue:
+                if tag.attrib['k'] == k_value:
                     v_value = tag.attrib['v']
                     search = pattern.search(v_value)
                     if search:
