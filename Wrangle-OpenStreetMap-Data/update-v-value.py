@@ -52,5 +52,5 @@ def update_phone_value(types, pattern):
     for phone_types, numbers in types.items():
         for number in numbers:
             if mapping.search(number):
-                number = re.sub(mapping, r'^\d\d\d-\d\d\d-\d\d\d\d$')
-    return
+                number = re.sub(pattern, r'^\d\d\d-\d\d\d-\d\d\d\d$')
+    return number
