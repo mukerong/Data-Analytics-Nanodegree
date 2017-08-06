@@ -35,9 +35,22 @@ def v_attrib_types(filename, k_attrib_value, pattern, expected):
                         except:
                             if not expected.search(v_type):
                                 types[v_type].add(v_value)
-
     return types
 
 
-def update_v_value(filename, v_attrib, expected):
-    v_attrib_types(filename, k_attrib_value, pattern, expected)
+def update_street_value(types, mapping):
+    for st_types, names in types.items():
+        for name in names:
+            old_name = name.split(' ')[-1]
+            if old_name in mapping:
+                better_name = mapping[old_name]
+                name = name.replace(old_name, better_name)
+    return name
+
+
+def update_phone_value(types, pattern):
+    for phone_types, numbers in types.items():
+        for number in numbers:
+            if mapping.search(number):
+                number = re.sub(mapping, r'^\d\d\d-\d\d\d-\d\d\d\d$')
+    return
