@@ -3,24 +3,28 @@ from collections import defaultdict
 import xml.etree.cElementTree as ET
 
 
-def audit_street_type(street_types, street_name):
-    match = street_type_re.search(street_name)
+def check_errors(v_value_types, v_value, pattern, expected):
+
+    match = pattern.search(v_value)
     if match:
-        street_type = m.group()
-        if street_type not in expected:
-            street_types[street_type].add(street_name)
+        v_value_type = match.group()
+        if v_value_type not in expected:
+            v_value_types[v_value_type].add(v_value)
+    return v_value_types
 
 
-def is_k_attrib(element, attrib_value):
-    return (element.attrib['k'] == attrib_value)
+def is_k_attrib(element, k_attrib_value):
+    return (element.attrib['k'] == k_attrib_value)
 
 
-def audit(filename):
+def audit(filename, k_attrib_value, pattern, expected):
+    v_value_types = defaultdict(set)
+
     with open(filename, 'r') as f:
-        street_types = defaultdict(set)
         for event, element in ET.iterparse(f, events=('start',)):
-            if element.tag == 'node' or elment.tag == 'way':
-                for tag in elment.iter('tag'):
-                    if is_k_attrib(tag):
-                        audit_street_type(street_types, tag.attrib['v'])
-    return street_types
+            if element.tag == 'node' or element.tag == 'way':
+                for tag in element.iter('tag'):
+                    if is_k_attrib(tag, k_attrib_value):
+                        check_errors(v_value_types,
+                                     tag.attrib['v'], pattern, expected)
+    return v_value_types
