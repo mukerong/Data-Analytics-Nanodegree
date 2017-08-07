@@ -28,3 +28,9 @@ def audit(filename, k_attrib_value, pattern, expected):
                         check_errors(v_value_types,
                                      tag.attrib['v'], pattern, expected)
     return v_value_types
+
+def fix_street_errors(error, mapping):
+    update_name = error.split(' ')[-1]
+    if update_name in mapping:
+        error = mapping[update_name]
+    return error
