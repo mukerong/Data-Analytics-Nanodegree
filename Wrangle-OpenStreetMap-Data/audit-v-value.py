@@ -43,10 +43,26 @@ def fix_street_errors(error, mapping):
     return error
 
 
+NODE_FIELDS = ['id', 'lat', 'lon', 'user', 'uid', 'version', 'changeset', 'timestamp']
+NODE_TAGS_FIELDS = ['id', 'key', 'value', 'type']
+WAY_FIELDS = ['id', 'user', 'uid', 'version', 'changeset', 'timestamp']
+WAY_TAGS_FIELDS = ['id', 'key', 'value', 'type']
+WAY_NODES_FIELDS = ['id', 'node_id', 'position']
+
+street_mapping = {
+    'Ave': 'Avenue',
+    'Ave.': 'Avenue',
+    'St': 'Street',
+    'St.': 'Street',
+    'Ln': 'Lane',
+    'Dr': 'Drive',
+    'Ct': 'Court'
+    }
+
+
 def shape_element(element,
                   node_attr_fields=NODE_FIELDS,
                   way_attr_fields=WAY_FIELDS,
-                  problem_chars=PROBLEMCHARS,
                   default_tag_type='regular'):
     node_attribs = {}
     way_attribs = {}
@@ -55,7 +71,7 @@ def shape_element(element,
 
     if element.tag == 'node':
         for item in NODE_FIELDS:
-            node_attrib[item] = element.get(item)
+            node_attribs[item] = element.get(item)
         for child in element:
             tag_dict = {}
             colon = child.get('k').find(':')
@@ -68,8 +84,7 @@ def shape_element(element,
                     tag_dict['type'] = type_value
                     tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        tag_dict['value'] =
-                        fix_street_errors(child.attrib['v'], mapping)
+                        tag_dict['value'] = fix_street_errors(child.attrib['v'], street_mapping)
                     else:
                         tag_dict['value'] = child.attrib['v']
                 else:
@@ -102,8 +117,7 @@ def shape_element(element,
                     way_tag_dict['type'] = type_value
                     way_tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        way_tag_dict['value'] =
-                        fix_street_errors(child.attrib['v'], mapping)
+                        way_tag_dict['value'] = fix_street_errors(child.attrib['v'], street_mapping)
                     else:
                         way_tag_dict['value'] = child.attrib['v']
                 else:
@@ -127,14 +141,21 @@ class UnicodeDictWriter(csv.DictWriter, object):
 
     def writerow(self, row):
         super(UnicodeDictWriter, self).writerow({
-            k: (v.encode('utf-8') if isinstance(v, unicode) else v)
-            for k, v in row.iteritems()
+            k: (str(v).encode('utf-8'))
+            for k, v in row.items()
         })
 
 
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
+
+
+NODES_PATH = "nodes.csv"
+NODE_TAGS_PATH = "nodes_tags.csv"
+WAYS_PATH = "ways.csv"
+WAY_NODES_PATH = "ways_nodes.csv"
+WAY_TAGS_PATH = "ways_tags.csv"
 
 
 def process_map(file_in):
@@ -144,9 +165,9 @@ def process_map(file_in):
          codecs.open(WAY_NODES_PATH, 'w') as way_nodes_file, \
          codecs.open(WAY_TAGS_PATH, 'w') as way_tags_file:
 
-        nodes.writer = UnicodeDictWriter(nodes_file, NODE_FIELDS)
+        nodes_writer = UnicodeDictWriter(nodes_file, NODE_FIELDS)
         node_tags_writer = UnicodeDictWriter(nodes_tags_file, NODE_TAGS_FIELDS)
-        way_writer = UnicodeDictWriter(ways_file, WAY_FIELDS)
+        ways_writer = UnicodeDictWriter(ways_file, WAY_FIELDS)
         way_nodes_writer = UnicodeDictWriter(way_nodes_file, WAY_NODES_FIELDS)
         way_tags_writer = UnicodeDictWriter(way_tags_file, WAY_TAGS_FIELDS)
 
