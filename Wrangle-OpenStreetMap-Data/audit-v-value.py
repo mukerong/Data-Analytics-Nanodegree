@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 import xml.etree.cElementTree as ET
+import csv
 
 
 def check_errors(v_value_types, v_value, pattern, expected):
@@ -109,3 +110,17 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
         if event == 'end' and elem.tag in tags:
             yield elem
             root.clear()
+
+
+class UnicodeDictWriter(csv.DictWriter, object):
+
+    def writerow(self, row):
+        super(UnicodeDictWriter, self).writerow({
+            k: (v.encode('utf-8') if isinstance(v, unicode) else v)
+            for k, v in row.iteritems()
+        })
+
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
