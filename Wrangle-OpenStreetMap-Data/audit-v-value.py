@@ -99,3 +99,13 @@ def shape_element(element,
                     way_tag_dict['type'] = 'regular'
                 tags.append(way_tag_dict)
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
+
+
+def get_element(osm_file, tags=('node', 'way', 'relation')):
+
+    context = ET.iterparse(osm_file, events=('start', 'end'))
+    _, root = next(context)
+    for event, elem in context:
+        if event == 'end' and elem.tag in tags:
+            yield elem
+            root.clear()
