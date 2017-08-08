@@ -39,3 +39,19 @@ def fix_street_errors(error, mapping):
     if update_name in mapping:
         error = mapping[update_name]
     return error
+
+
+def shape_element(element,
+                  node_attr_fields=NODE_FIELDS,
+                  way_attr_fields=WAY_FIELDS,
+                  problem_chars=PROBLEMCHARS,
+                  default_tag_type='regular'):
+    node_attribs = {}
+    way_attribs = {}
+    way_nodes = []
+    tags = []
+
+    if element.tag == 'nodes':
+        for item in NODE_FIELDS:
+            node_attrib[item] = element.get(item)
+        for child in element:
