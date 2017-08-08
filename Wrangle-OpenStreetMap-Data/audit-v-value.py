@@ -159,3 +159,10 @@ def process_map(file_in):
         for element in get_element(file_in, tags=('node', 'way')):
             el = shape_element(element)
             if el:
+                if element.tag == 'node':
+                    nodes_writer.writerow(el['node'])
+                    node_tags_writer.writerows(el['node_tags'])
+                elif element.tag == 'way':
+                    ways_writer.writerow(el['way'])
+                    way_nodes_writer.writerows(el['way_nodes'])
+                    way_tags_writer.writerows(el['way_tags'])
