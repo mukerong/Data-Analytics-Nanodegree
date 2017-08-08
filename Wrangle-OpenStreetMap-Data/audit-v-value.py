@@ -55,3 +55,47 @@ def shape_element(element,
         for item in NODE_FIELDS:
             node_attrib[item] = element.get(item)
         for child in element:
+            tag_dict = {}
+            colon = child.get('k').find(':')
+            if child.tag == 'tag':
+                tag_dict['id'] = element.get('id')
+                tag_dict['value'] = child.get('v')
+                if colon != -1:
+                    type_value = child.get('k')[:colon]
+                    key_value = child.get('k')[colon+1:]
+                    tag_dict['type'] = type_value
+                    tag_dict['key'] = key_value
+                else:
+                    tag_dict['key'] = child.get('k')
+                    tag_dict['type'] = 'regular'
+                tags.append(tag_dict)
+        return {'node': node_attribs, 'node_tags': tags}
+    elif element.tag == 'way':
+        for item in WAY_FIELDS:
+            way_attribs[item] = element.get(item)
+
+        n = 0
+        for child in element:
+            if child.tag == 'nd':
+                nd_dict = {}
+                nd_dict['id'] = element.get('id')
+                nd_dict['node_id'] = child.get('ref')
+                nd_dict['position'] = n
+                n += 1
+                way_nodes.append(nd_dict)
+
+            if child.tag == 'tag':
+                way_tag_dict = {}
+                colon = child.get('k').find(':')
+                way_tag_dict['id'] = element.get('id')
+                way_tag_dict['value'] = element.get('v')
+                if colon != -1:
+                    type_value = child.get('k')[:colon]
+                    key_value = child.get('k')[colon+1:]
+                    way_tag_dict['type'] = type_value
+                    way_tag_dict['key'] = key_value
+                else:
+                    way_tag_dict['key'] = child.get('k')
+                    way_tag_dict['type'] = 'regular'
+                tags.append(way_tag_dict)
+        return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
