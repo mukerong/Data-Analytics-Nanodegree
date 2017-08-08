@@ -68,10 +68,10 @@ def shape_element(element,
                     tag_dict['type'] = type_value
                     tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        node_tag['value'] =
+                        tag_dict['value'] =
                         fix_street_errors(child.attrib['v'], mapping)
                     else:
-                        node_tag['value'] = child.attrib['v']
+                        tag_dict['value'] = child.attrib['v']
                 else:
                     tag_dict['key'] = child.get('k')
                     tag_dict['type'] = 'regular'
@@ -102,10 +102,10 @@ def shape_element(element,
                     way_tag_dict['type'] = type_value
                     way_tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        node_tag['value'] =
+                        way_tag_dict['value'] =
                         fix_street_errors(child.attrib['v'], mapping)
                     else:
-                        node_tag['value'] = child.attrib['v']
+                        way_tag_dict['value'] = child.attrib['v']
                 else:
                     way_tag_dict['key'] = child.get('k')
                     way_tag_dict['type'] = 'regular'
