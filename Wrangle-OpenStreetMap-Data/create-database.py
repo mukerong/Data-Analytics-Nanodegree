@@ -32,8 +32,7 @@ cursor.execute('''
 connect.commit()
 
 # Read the csv file as a dictionary, format the data as a list of tuples
-with open('nodes.csv', 'rb') as f:
-    dr = csv.DictReader(fin)
-    to_db = [(i['id'], i['lat'], i['lon'], i['user'],
-              i['uid'], i['version'], i['changeset'], i['timestamp'])
+with open('nodes.csv', 'rt', encoding='utf8') as f:
+    dr = csv.DictReader(f)
+    to_db = [(i['id'], i['lat'], i['lon'], i['user'], i['uid'], i['version'], i['changeset'], i['timestamp'])
              for i in dr]
