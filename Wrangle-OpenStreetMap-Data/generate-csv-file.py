@@ -51,7 +51,9 @@ def shape_element(element,
                     tag_dict['type'] = type_value
                     tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        tag_dict['value'] = fix_street_errors(child.attrib['v'], street_mapping)
+                        tag_dict['value'] = fix_street_errors(
+                                child.attrib['v'], street_mapping
+                                )
                     else:
                         tag_dict['value'] = child.attrib['v']
                 else:
@@ -111,7 +113,6 @@ class UnicodeDictWriter(csv.DictWriter, object):
             k: (str(v).encode('utf-8'))
             for k, v in row.items()
         })
-
 
     def writerows(self, rows):
         for row in rows:
