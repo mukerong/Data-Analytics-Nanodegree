@@ -31,7 +31,7 @@ cursor.execute('''
 connect.commit()
 
 # Create table "nodes"
-# Create tables based on pre-defined schema
+# Create tables based on pre-defined scherma
 cursor.execute('''
         CREATE TABLE nodes (
         id INTEGER PRIMARY KEY NOT NULL,
