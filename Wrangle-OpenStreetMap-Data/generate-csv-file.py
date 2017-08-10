@@ -1,6 +1,9 @@
 import xml.etree.cElementTree as ET
 import csv
 import codecs
+import cerberus
+import schema
+import pprint
 
 NODE_FIELDS = ['id', 'lat', 'lon', 'user', 'uid',
                'version', 'changeset', 'timestamp']
@@ -8,6 +11,8 @@ NODE_TAGS_FIELDS = ['id', 'key', 'value', 'type']
 WAY_FIELDS = ['id', 'user', 'uid', 'version', 'changeset', 'timestamp']
 WAY_TAGS_FIELDS = ['id', 'key', 'value', 'type']
 WAY_NODES_FIELDS = ['id', 'node_id', 'position']
+
+SCHEMA = schema.schema
 
 street_mapping = {
     'Ave': 'Avenue',
@@ -51,9 +56,12 @@ def shape_element(element,
                     tag_dict['type'] = type_value
                     tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        tag_dict['value'] = fix_street_errors(
-                                child.attrib['v'], street_mapping
-                                )
+                        if fix_street_errors(child.attrib['v'], street_mapping):
+                            tag_dict['value'] = fix_street_errors(
+                                    child.attrib['v'], street_mapping
+                                    )
+                        else:
+                            continue
                     else:
                         tag_dict['value'] = child.attrib['v']
                 else:
@@ -79,14 +87,18 @@ def shape_element(element,
                 way_tag_dict = {}
                 colon = child.get('k').find(':')
                 way_tag_dict['id'] = element.get('id')
-                way_tag_dict['value'] = element.get('v')
+                way_tag_dict['value'] = child.get('v')
                 if colon != -1:
                     type_value = child.get('k')[:colon]
                     key_value = child.get('k')[colon+1:]
                     way_tag_dict['type'] = type_value
                     way_tag_dict['key'] = key_value
                     if child.attrib['k'] == 'addr:street':
-                        way_tag_dict['value'] = fix_street_errors(child.attrib['v'], street_mapping)
+                        if fix_street_errors(child.attrib['v'], street_mapping):
+                            way_tag_dict['value'] = fix_street_errors(
+                                child.attrib['v'], street_mapping)
+                        else:
+                            continue
                     else:
                         way_tag_dict['value'] = child.attrib['v']
                 else:
@@ -106,12 +118,21 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
             root.clear()
 
 
+def validate_element(element, validator, schema=SCHEMA):
+    if validator.validate(element, schema) is not True:
+        field, errors = next(validator.errors.iteritems())
+        message_string = "\nElement of type '{0}' has the following errors: \n{1}"
+        error_string = pprint.pformat(errors)
+
+        raise Exception(message_string.format(field, error_string))
+
+
 class UnicodeDictWriter(csv.DictWriter, object):
 
     def writerow(self, row):
         super(UnicodeDictWriter, self).writerow({
-            k: (str(v).encode('utf-8'))
-            for k, v in row.items()
+            k: (v.encode('utf-8') if isinstance(v, unicode) else v)
+            for k, v in row.iteritems()
         })
 
     def writerows(self, rows):
@@ -126,7 +147,7 @@ WAY_NODES_PATH = "ways_nodes.csv"
 WAY_TAGS_PATH = "ways_tags.csv"
 
 
-def process_map(file_in):
+def process_map(file_in, validate):
     with codecs.open(NODES_PATH, 'w') as nodes_file, \
          codecs.open(NODE_TAGS_PATH, 'w') as nodes_tags_file, \
          codecs.open(WAYS_PATH, 'w') as ways_file, \
@@ -145,9 +166,14 @@ def process_map(file_in):
         way_nodes_writer.writeheader()
         way_tags_writer.writeheader()
 
+        validator = cerberus.Validator()
+
         for element in get_element(file_in, tags=('node', 'way')):
             el = shape_element(element)
             if el:
+                if validate is True:
+                    validate_element(el, validator)
+
                 if element.tag == 'node':
                     nodes_writer.writerow(el['node'])
                     node_tags_writer.writerows(el['node_tags'])
