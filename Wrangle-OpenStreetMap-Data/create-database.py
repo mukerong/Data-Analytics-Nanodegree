@@ -34,8 +34,10 @@ connect.commit()
 # Read the csv file as a dictionary, format the data as a list of tuples
 with open('nodes.csv', 'rb') as f:
     dr = csv.DictReader(f)
-    to_db = [(i['id'], i['lat'], i['lon'], i['user'], i['uid'],
-              i['version'], i['changeset'], i['timestamp'])
+    to_db = [(i['id'].decode('utf-8'), i['lat'].decode('utf-8'),
+              i['lon'].decode('utf-8'), i['user'].decode('utf-8'),
+              i['uid'].decode('utf-8'), i['version'].decode('utf-8'),
+              i['changeset'].decode('utf-8'), i['timestamp'].decode('utf-8'))
              for i in dr]
 
 # Insear the formatted data
@@ -43,4 +45,3 @@ cursor.executemany('''INSERT INTO nodes(id, lat, lon, user, uid, version,
                    changeset, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);''',
                    to_db)
 connect.commit()
-connect.close()
