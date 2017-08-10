@@ -11,8 +11,8 @@ cursor = connect.cursor()
 
 # Drop the table if exists
 cursor.execute('''
-               DROP TABLE IF EXISTS nodes
-''')
+               DROP TABLE IF EXISTS nodes''')
+connect.commit()
 
 # Create tables based on pre-defined schema
 cursor.execute('''
@@ -32,7 +32,15 @@ cursor.execute('''
 connect.commit()
 
 # Read the csv file as a dictionary, format the data as a list of tuples
-with open('nodes.csv', 'rt', encoding='utf8') as f:
+with open('nodes.csv', 'rb') as f:
     dr = csv.DictReader(f)
-    to_db = [(i['id'], i['lat'], i['lon'], i['user'], i['uid'], i['version'], i['changeset'], i['timestamp'])
+    to_db = [(i['id'], i['lat'], i['lon'], i['user'], i['uid'],
+              i['version'], i['changeset'], i['timestamp'])
              for i in dr]
+
+# Insear the formatted data
+cursor.executemany('''INSERT INTO nodes(id, lat, lon, user, uid, version,
+                   changeset, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);''',
+                   to_db)
+connect.commit()
+connect.close()
