@@ -154,3 +154,4 @@ cursor.executemany('''INSERT INTO ways_nodes(
                    id, node_id, position)
                    VALUES (?, ?, ?)''', to_db)
 connect.commit()
+connect.close()
