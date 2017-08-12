@@ -1,17 +1,17 @@
 # Define a function to return the # of cuisine_type within a map
-def cuisine_number():
+def cuisine_number(cursor):
     '''This function will return the # of restaurants of each cuisine types
     within the osm database
     '''
     Q = '''
-    SELECT value, COUNT DISTINCT(id)
+    SELECT value, COUNT (DISTINCT(id))
     FROM nodes_tags
     WHERE key = 'cuisine'
     GROUP BY value
     ORDER BY 2 DESC
     '''
 
-    return c.execute(Q).fetchall()
+    return cursor.execute(Q).fetchall()
 
 
 # Define a function to return the zipcode and # of cuisine_type in that area
