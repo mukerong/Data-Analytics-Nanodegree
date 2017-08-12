@@ -44,8 +44,28 @@ def num_restaurant(cursor):
     '''
     QUERY = '''
     SELECT COUNT (DISTINCT(id)) FROM nodes_tags
-    WHERE nodes_tags.value = 'restaurants';
+    WHERE nodes_tags.value = 'restaurant';
     '''
 
     results = cursor.execute(QUERY).fetchall()
+    return results
+
+
+# Define a function to find restaurants without a postcode
+def cuisine_wo_code(cursor, cuisine_type):
+    '''
+    This function will return the id and # of restaurants that
+    don't have a postcode.
+    '''
+    Q = '''
+    SELECT nodes_tags.id, nodes_tags.value
+    FROM nodes_tags
+    WHERE (id NOT IN
+        (SELECT DISTINCT(id) FROM nodes_tags
+        WHERE key = 'postcode'))
+    AND (key = 'cuisine')
+    AND (value = "{}")
+    '''.format(cuisine_type)
+
+    results = cursor.exectue(Q).fetchall()
     return results
