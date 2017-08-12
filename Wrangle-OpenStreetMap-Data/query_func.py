@@ -15,19 +15,21 @@ def cuisine_number(cursor):
 
 
 # Define a function to return the zipcode and # of cuisine_type in that area
-def cuisine_location(cuisine_type):
-    '''This function will return the postcode and the cuisine type
+def cuisine_location(cursor, cuisine_type):
+    '''
+    This function will return the postcode and the cuisine type
     '''
     QUERY = '''
-    SELECT nodes_tags.value, count(*) as num
+    SELECT nodes_tags.value, COUNT(*)
     FROM nodes_tags
-    JOIN (SELECT DISTINCT (id) FROM nodes_tags
-            WHERE key = 'cuisine' AND value = {}) as second_nodes_tags
-    ON nodes_tags.id = second_nodes_tags
+    JOIN
+        (SELECT DISTINCT (id) FROM nodes_tags
+        WHERE key = 'cuisine' AND value = "{}") as second_nodes_tags
+    ON nodes_tags.id = second_nodes_tags.id
     WHERE nodes_tags.key = 'postcode'
-    GROUP BY nodes_tags.value
-    ORDER BY num DESC;
-    '''.format(cuisine)
+    GROUP BY 1
+    ORDER BY 2 DESC;
+    '''.format(cuisine_type)
 
-    results = c.execute(QUERY).fetchall()
+    results = cursor.execute(QUERY).fetchall()
     return results
