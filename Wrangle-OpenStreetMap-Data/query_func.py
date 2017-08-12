@@ -67,5 +67,5 @@ def cuisine_wo_code(cursor, cuisine_type):
     AND (value = "{}")
     '''.format(cuisine_type)
 
-    results = cursor.exectue(Q).fetchall()
+    results = cursor.execute(Q).fetchall()
     return results
