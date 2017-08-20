@@ -27,10 +27,13 @@ ages_train, ages_test, net_worths_train, net_worths_test = train_test_split(ages
 ### the plotting code below works, and you can see what your regression looks like
 from sklearn.linear_model import LinearRegression
 
+
 reg = LinearRegression()
 reg.fit(ages_train, net_worths_train)
 print "slope: ", reg.coef_
 print "intercept:", reg.intercept_
+
+
 
 try:
     plt.plot(ages, reg.predict(ages), color="blue")
@@ -48,11 +51,6 @@ try:
 except NameError:
     print "your regression object doesn't exist, or isn't name reg"
     print "can't make predictions to use in identifying outliers"
-
-
-
-
-
 
 
 ### only run this code if cleaned_data is returning data
