@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from operator import itemgetter
 
 
 def outlierCleaner(predictions, ages, net_worths):
@@ -12,16 +13,15 @@ def outlierCleaner(predictions, ages, net_worths):
     """
 
     cleaned_data = []
-    print net_worths
     ### your code goes here
     errors = [abs(net_worth - prediction) for net_worth, prediction
               in zip(net_worths, predictions)]
     raw_data = [(age, net_worth, error) for age, net_worth, error
                 in zip(ages, net_worths, errors)]
-    print raw_data
+    raw_data = sorted(raw_data, key = itemgetter(2))
+    total_left = int(round(len(raw_data)*0.9))
+    cleaned_data = raw_data[:total_left]
+
 
 
     return cleaned_data
-
-
-outlierCleaner([1, 2, 3], [1, 2, 3], [3, 2, 6])
