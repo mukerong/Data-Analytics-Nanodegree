@@ -22,6 +22,4 @@ def outlierCleaner(predictions, ages, net_worths):
     total_left = int(round(len(raw_data)*0.9))
     cleaned_data = raw_data[:total_left]
 
-
-
     return cleaned_data
