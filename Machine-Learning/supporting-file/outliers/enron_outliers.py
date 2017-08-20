@@ -2,7 +2,8 @@
 
 import pickle
 import sys
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
+
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
@@ -14,6 +15,11 @@ data = featureFormat(data_dict, features)
 
 
 ### your code below
+for item in data:
+    salary = item[0]
+    bonus = item[1]
+    plt.scatter(salary, bonus)
 
-
-
+plt.xlabel('salary')
+plt.ylabel('bonus')
+plt.show()
