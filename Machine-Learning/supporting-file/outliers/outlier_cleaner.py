@@ -12,12 +12,14 @@ def outlierCleaner(predictions, ages, net_worths):
     """
 
     cleaned_data = []
-
+    print net_worths
     ### your code goes here
-    errors = [abs(net_worths - predictions) for net_worths, predictions
+    errors = [abs(net_worth - prediction) for net_worth, prediction
               in zip(net_worths, predictions)]
-    errors = sorted(errors)
-    print errors
+    raw_data = [(age, net_worth, error) for age, net_worth, error
+                in zip(ages, net_worths, errors)]
+    print raw_data
+
 
     return cleaned_data
 
