@@ -1,15 +1,8 @@
-<<<<<<< HEAD
 *.pyc
 enron_mail_20110402.tgz
 enron_mail_20110402/
-enron_mail_20150507.tgz
-maildir/
 text_learning/your_word_data.pkl
 text_learning/your_email_authors.pkl
 my_classifier.pkl
 my_dataset.pkl
 my_feature_list.pkl
-||||||| merged common ancestors
-=======
-/.git.bfg-report
->>>>>>> 91e03923aca8b3638885482f5adbef05c573ab27
