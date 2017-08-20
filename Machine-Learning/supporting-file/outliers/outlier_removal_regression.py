@@ -32,15 +32,6 @@ reg.fit(ages_train, net_worths_train)
 print "slope: ", reg.coef_
 print "intercept:", reg.intercept_
 
-
-
-
-
-
-
-
-
-
 try:
     plt.plot(ages, reg.predict(ages), color="blue")
 except NameError:
