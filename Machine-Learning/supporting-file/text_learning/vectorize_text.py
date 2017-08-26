@@ -33,15 +33,15 @@ word_data = []
 ### can take a long time
 ### temp_counter helps you only look at the first 200 emails in the list so you
 ### can iterate your modifications quicker
-temp_counter = 0
+
 remove_list = ["sara", "shackleton", "chris", "germani"]
 
 for name, from_person in [("sara", from_sara), ("chris", from_chris)]:
     for path in from_person:
         ### only look at first 200 emails when developing
         ### once everything is working, remove this line to run over full dataset
-        temp_counter += 1
-        if temp_counter < 200:
+
+
             path = os.path.join('..', path[:-1])
             email = open(path, "r")
             ### use parseOutText to extract the text from the opened email
