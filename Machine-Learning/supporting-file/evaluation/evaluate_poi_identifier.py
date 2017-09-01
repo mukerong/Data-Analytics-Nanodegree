@@ -26,6 +26,12 @@ labels, features = targetFeatureSplit(data)
 
 
 
-### your code goes here 
+### your code goes here
 
+from sklearn import tree
+from sklearn.metrics import accuracy_score
 
+tree = tree.DecisionTreeClassifier()
+tree.fit(features_train, labels_train)
+predict = tree.predict(features_test)
+accuracy_score(predict, labels_test)
