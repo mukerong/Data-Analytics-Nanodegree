@@ -11,6 +11,7 @@ with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
 # Remove outliers and create a new data dictionary
+data_dict.pop('TOTAL', 0)
 enron_dataset = data_dict
 
 # Read data using the defined feature list
@@ -29,5 +30,4 @@ poi = pd.Series([0, 1], index=[False, True])
 enron_dataframe['poi'] = enron_dataframe.poi.map(poi)
 
 # Visualize the data to find outliers
-scatter_matrix(enron_dataframe,
-               figsize=(24, 18), diagonal='kde', alpha=0.2)
+enron_dataframe.plot.scatter(x='poi', y='salary')
