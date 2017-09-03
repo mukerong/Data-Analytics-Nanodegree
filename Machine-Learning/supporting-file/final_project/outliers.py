@@ -30,4 +30,5 @@ poi = pd.Series([0, 1], index=[False, True])
 enron_dataframe['poi'] = enron_dataframe.poi.map(poi)
 
 # Visualize the data to find outliers
-enron_dataframe.plot.scatter(x='poi', y='salary')
+for col in enron_dataframe.columns:
+    enron_dataframe.plot.scatter(x='poi', y=col)
