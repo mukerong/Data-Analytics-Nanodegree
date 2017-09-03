@@ -14,10 +14,6 @@ with open("final_project_dataset.pkl", "r") as data_file:
 data_dict.pop('TOTAL', 0)
 enron_dataset = data_dict
 
-# Read data using the defined feature list
-features_list = ['poi', 'salary']
-data = featureFormat(enron_dataset, features_list, sort_keys=True)
-
 # Read the data to a dataframe
 enron_dataframe = pd.DataFrame(enron_dataset.values())
 employees = pd.Series(enron_dataset.keys())
