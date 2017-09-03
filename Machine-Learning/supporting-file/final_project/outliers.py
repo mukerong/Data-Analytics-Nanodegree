@@ -12,11 +12,10 @@ with open("final_project_dataset.pkl", "r") as data_file:
 
 # Remove outliers and create a new data dictionary
 data_dict.pop('TOTAL', 0)
-enron_dataset = data_dict
 
 # Read the data to a dataframe
-enron_dataframe = pd.DataFrame(enron_dataset.values())
-employees = pd.Series(enron_dataset.keys())
+enron_dataframe = pd.DataFrame(data_dict.values())
+employees = pd.Series(data_dict.keys())
 enron_dataframe.set_index(employees, inplace=True)
 
 enron_dataframe = enron_dataframe.apply(lambda x:
