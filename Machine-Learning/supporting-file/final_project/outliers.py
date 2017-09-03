@@ -4,7 +4,6 @@ import pickle
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pandas.plotting import scatter_matrix
 from feature_format import featureFormat, targetFeatureSplit
 
 # Read the original dataset
@@ -18,7 +17,17 @@ enron_dataset = data_dict
 features_list = ['poi', 'salary']
 data = featureFormat(enron_dataset, features_list, sort_keys=True)
 
-# Visualize the data to find outliers
+# Read the data to a dataframe
 enron_dataframe = pd.DataFrame(enron_dataset.values())
 employees = pd.Series(enron_dataset.keys())
 enron_dataframe.set_index(employees, inplace=True)
+
+enron_dataframe = enron_dataframe.apply(lambda x:
+                                        pd.to_numeric(x, errors='coerce'))
+
+poi = pd.Series([0, 1], index=[False, True])
+enron_dataframe['poi'] = enron_dataframe.poi.map(poi)
+
+# Visualize the data to find outliers
+scatter_matrix(enron_dataframe,
+               figsize=(24, 18), diagonal='kde', alpha=0.2)
