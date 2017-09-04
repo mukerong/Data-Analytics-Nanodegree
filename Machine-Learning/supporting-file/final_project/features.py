@@ -32,8 +32,4 @@ features_list = ['poi','salary', 'bonus', 'exercised_stock_options',
                  'bonus_salary_ratio', 'from_this_person_to_poi',
                  'from_poi_to_this_person']
 
-
-# Feature transformation
-
-# selector = SelectPercentile(features, percentile=10)
-# selector.fit()
+enron_dataset = data_dict
