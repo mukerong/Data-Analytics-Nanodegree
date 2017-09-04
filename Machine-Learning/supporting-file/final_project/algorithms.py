@@ -7,7 +7,7 @@ from sklearn.feature_selection import SelectKBest, SelectPercentile
 from sklearn.model_selection import train_test_split, KFold, GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn import tree
-from sklearn import
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
@@ -70,9 +70,30 @@ print "svc recall_score", \
     recall_score(labels_test, svc_prediction)
 '''
 
-
+'''
 # Use pipeline to tune KNN
-estimators = [('scaler', MinMaxScaler()),
-              ('feature_selection', SelectKBest()),
-              ('knn', )
-              ]
+estimators = [
+    ('scaler', MinMaxScaler()),
+    ('feature_selection', SelectKBest()),
+    ('knn', KNeighborsClassifier())
+]
+pipeline = Pipeline(estimators)
+
+parameters = {
+    'feature_selection__k': [2, 3, 4, 5, 6, 'all'],
+    'knn__n_neighbors': [1, 2, 3, 4, 5],
+    'knn__leaf_size': [1, 10, 30, 60],
+    'knn__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
+}
+
+clf = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',error_score=0)
+clf.fit(features_train, labels_train)
+knn_prediction = clf.predict(features_test)
+
+print "knn accuracy score: ", \
+    accuracy_score(labels_test, knn_prediction)
+print "knn precision_score: ", \
+    precision_score(labels_test, knn_prediction)
+print "knn recall_score", \
+    recall_score(labels_test, knn_prediction)
+'''
