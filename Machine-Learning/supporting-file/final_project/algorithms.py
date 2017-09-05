@@ -97,3 +97,38 @@ print "knn precision_score: ", \
 print "knn recall_score", \
     recall_score(labels_test, knn_prediction)
 '''
+
+# Use KFold and AdaBoost
+estimators = [
+    ('scaler', MinMaxScaler()),
+    ('feature_selection', SelectKBest()),
+    ('adaboost', AdaBoostClassifier())
+]
+pipeline = Pipeline(estimators)
+
+parameters = {
+    'feature_selection__k': [2, 3, 4, 5, 6, 'all'],
+    'adaboost__n_estimators': [10, 50, 100],
+    'adaboost__learning_rate': [1, 5, 10],
+    'adaboost__algorithm': ['SAMME', 'SAMME.R']
+}
+
+kfold = KFold(n_splits=3, shuffle=True)
+for train_indices, test_indices in kfold.split(labels):
+    features_train = [features[i] for i in train_indices]
+    features_test = [features[i] for i in test_indices]
+    labels_train = [labels[i] for i in train_indices]
+    labels_test = [labels[i] for i in test_indices]
+
+    clf = GridSearchCV(pipeline, param_grid=parameters,
+                       scoring='f1',error_score=0)
+
+    clf.fit(features_train, labels_train)
+    adaboost_prediction = clf.predict(features_test)
+
+    print "adaboost accuracy score: ", \
+        accuracy_score(labels_test, adaboost_prediction)
+    print "adaboost precision_score: ", \
+        precision_score(labels_test, adaboost_prediction)
+    print "adaboost recall_score", \
+        recall_score(labels_test, adaboost_prediction)
