@@ -7,3 +7,5 @@ my_classifier.pkl
 my_dataset.pkl
 my_feature_list.pkl
 /maildir
+*.html
+*.zip
