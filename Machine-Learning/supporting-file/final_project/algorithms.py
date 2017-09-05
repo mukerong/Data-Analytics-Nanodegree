@@ -114,21 +114,17 @@ parameters = {
 }
 
 kfold = KFold(n_splits=3, shuffle=True)
-for train_indices, test_indices in kfold.split(labels):
-    features_train = [features[i] for i in train_indices]
-    features_test = [features[i] for i in test_indices]
-    labels_train = [labels[i] for i in train_indices]
-    labels_test = [labels[i] for i in test_indices]
 
-    clf = GridSearchCV(pipeline, param_grid=parameters,
-                       scoring='f1',error_score=0)
+gs = GridSearchCV(pipeline, param_grid=parameters,
+                   scoring='f1',error_score=0, cv=kfold)
 
-    clf.fit(features_train, labels_train)
-    adaboost_prediction = clf.predict(features_test)
+gs.fit(features, labels)
+clf = gs.best_estimator_
+adaboost_prediction = clf.predict(features_test)
 
-    print "adaboost accuracy score: ", \
-        accuracy_score(labels_test, adaboost_prediction)
-    print "adaboost precision_score: ", \
-        precision_score(labels_test, adaboost_prediction)
-    print "adaboost recall_score", \
-        recall_score(labels_test, adaboost_prediction)
+print "adaboost accuracy score: ", \
+    accuracy_score(labels_test, adaboost_prediction)
+print "adaboost precision_score: ", \
+    precision_score(labels_test, adaboost_prediction)
+print "adaboost recall_score", \
+    recall_score(labels_test, adaboost_prediction)
