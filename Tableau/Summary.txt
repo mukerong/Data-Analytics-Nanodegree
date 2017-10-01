@@ -1,0 +1,26 @@
+# Summary
+
+Link to Version 1: https://public.tableau.com/profile/guanrong.fu#!/vizhome/FlightDelayv1/Story1
+
+Link to final version: https://public.tableau.com/profile/guanrong.fu#!/vizhome/FlightDelay_3/Story1
+
+The visualization helps understand the domestic flight delay information in US. It will show which airport has the highest delay rate and which airline has the highest delay rate. It also shows how long per delay on average overall.
+
+# Design 
+
+After finding this dataset, I want to understand which airport has the most delay, and which carriers cause the most delays. My experience makes me think that UA has the most delay, and I want to figure out. My focus of this visualization will based on these questions.
+
+After finishing the version 1, I send it to several of my friends to check if there are any ambiguity within my visualization. Based on their feedback, it seems to me that marks and multiple colors (instead of one color) will help the understanding of the visualization. 
+
+# Feedback
+
+After my friends see the story, they point some ambiguity. First, in the map, it is a little hard to tell which point has the darkest blue (the highest delay rate), and which point has the biggest one. 
+
+Same issues with the line chart, some marks can make my point more clear.
+
+Also, one friend wants to get a way to play around with all the charts I have, instead of just seeing each one of them, so I create a dashboard to for interactions.
+
+
+# Resources
+
+N/A
