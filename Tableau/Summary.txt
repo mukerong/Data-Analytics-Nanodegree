@@ -10,6 +10,14 @@ The visualization helps understand the domestic flight delay information in US. 
 
 After finding this dataset, I want to understand which airport has the most delay, and which carriers cause the most delays. My experience makes me think that UA has the most delay, and I want to figure out. My focus of this visualization will based on these questions.
 
+To illustrate which airport has the highest delay rate, the best way to visualize is to use a map. To show the delay rate, I decide to use both color and size to make it intuitive for people to see which one has the highest rate.
+
+To find which year has the highest delay rate, bar plots are better choice. It will be easier to compare between them, and potentially find trends.
+
+To find the average delay time per delay, running a "trend" can be a good idea. Therefore, it is very good idea to choose scatterplot between delay amount and delay time.
+
+To find which airplane has the highest delay rate, treemap is a very intuitive way to do so. It separate the delay amount based on the carriers, and it is very easy to see which carrier has the highest delay rate.
+
 After finishing the version 1, I send it to several of my friends to check if there are any ambiguity within my visualization. Based on their feedback, it seems to me that marks and multiple colors (instead of one color) will help the understanding of the visualization. 
 
 # Feedback
