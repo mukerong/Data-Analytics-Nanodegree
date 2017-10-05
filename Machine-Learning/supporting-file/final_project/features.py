@@ -2,7 +2,15 @@ from outliers import data_dict
 import sys
 sys.path.append("../tools/")
 
-# Create new features
+# Create the initial feature list
+features_list = []
+
+for _, value in data_dict.items():
+    for k, _ in value.items():
+        features_list.append(k)
+    break
+
+# Create new features and append to features_list
 # bonus/salary ratio
 for employee, features in data_dict.items():
     if features['salary'] != "NaN" and features['bonus'] != 'NaN':
@@ -10,6 +18,7 @@ for employee, features in data_dict.items():
         float(features['salary'])/float(features['bonus'])
     else:
         features['bonus_salary_ratio'] = "NaN"
+features_list.append('bonus_salary_ratio')
 
 # from_this_person_to_poi/from_messages ratio
 for employee, features in data_dict.items():
@@ -18,6 +27,7 @@ for employee, features in data_dict.items():
         float(features['from_this_person_to_poi'])/float(features['from_messages'])
     else:
         features['from_this_person_to_poi_percentage'] = "NaN"
+features_list.append('from_this_person_to_poi_percentage')
 
 # from_poi_to_this_person/to_messages ratio
 for employee, features in data_dict.items():
@@ -26,10 +36,9 @@ for employee, features in data_dict.items():
         float(features['from_poi_to_this_person'])/float(features['to_messages'])
     else:
         features['from_poi_to_this_person_percentage'] = "NaN"
+features_list.append('from_poi_to_this_person_percentage')
 
-# Select features and create variables
-features_list = ['poi','salary', 'bonus', 'exercised_stock_options',
-                 'bonus_salary_ratio', 'from_this_person_to_poi',
-                 'from_poi_to_this_person']
+
+# Create a dictonary for future analysis
 
 enron_dataset = data_dict
