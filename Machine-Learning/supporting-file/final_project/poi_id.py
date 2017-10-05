@@ -25,6 +25,21 @@ with open("final_project_dataset.pkl", "r") as data_file:
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
 
+
+# Select features and create variables
+features_list = []
+
+for _, value in data_dict.items():
+    for k, _ in value.items():
+        features_list.append(k)
+    break
+
+### Task 2: Remove outliers
+data_dict.pop('TOTAL', 0)
+
+### Task 3: Create new feature(s)
+### Store to enron_dataset for easy export below.
+
 for employee, features in data_dict.items():
     if features['salary'] != "NaN" and features['bonus'] != 'NaN':
         features['bonus_salary_ratio'] = \
@@ -48,16 +63,8 @@ for employee, features in data_dict.items():
     else:
         features['from_poi_to_this_person_percentage'] = "NaN"
 
-# Select features and create variables
-features_list = ['poi','salary', 'bonus', 'exercised_stock_options',
-                 'bonus_salary_ratio', 'from_this_person_to_poi',
-                 'from_poi_to_this_person']
+feature_list.append('from_this_person_to_poi', 'from_poi_to_this_person')
 
-### Task 2: Remove outliers
-data_dict.pop('TOTAL', 0)
-
-### Task 3: Create new feature(s)
-### Store to enron_dataset for easy export below.
 enron_dataset = data_dict
 
 ### Extract features and labels from dataset for local testing
