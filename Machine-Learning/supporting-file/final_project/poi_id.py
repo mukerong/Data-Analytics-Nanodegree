@@ -37,15 +37,17 @@ for _, value in data_dict.items():
 ### Task 2: Remove outliers
 data_dict.pop('TOTAL', 0)
 
-### Task 3: Create new feature(s)
+### Task 3: Create new feature(s) and append to features list
 ### Store to enron_dataset for easy export below.
 
+# bonus/salary ratio
 for employee, features in data_dict.items():
     if features['salary'] != "NaN" and features['bonus'] != 'NaN':
         features['bonus_salary_ratio'] = \
         float(features['salary'])/float(features['bonus'])
     else:
         features['bonus_salary_ratio'] = "NaN"
+features_list.append('bonus_salary_ratio')
 
 # from_this_person_to_poi/from_messages ratio
 for employee, features in data_dict.items():
@@ -54,6 +56,7 @@ for employee, features in data_dict.items():
         float(features['from_this_person_to_poi'])/float(features['from_messages'])
     else:
         features['from_this_person_to_poi_percentage'] = "NaN"
+features_list.append('from_this_person_to_poi_percentage')
 
 # from_poi_to_this_person/to_messages ratio
 for employee, features in data_dict.items():
@@ -62,8 +65,7 @@ for employee, features in data_dict.items():
         float(features['from_poi_to_this_person'])/float(features['to_messages'])
     else:
         features['from_poi_to_this_person_percentage'] = "NaN"
-
-feature_list.append('from_this_person_to_poi', 'from_poi_to_this_person')
+features_list.append('from_poi_to_this_person_percentage')
 
 enron_dataset = data_dict
 
