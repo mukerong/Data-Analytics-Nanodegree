@@ -1,0 +1,67 @@
+# Identify Fraud from Enron Email
+
+## Question 1:
+
+Enron scandal is one of the most famous scandals in the world. Because of the fraud, Enron went bankrupt in 2002. I heard and learnt a lot about it since day one in business school. During that time, all I learnt was about how did they cheat on their financial statement, but why Arthur Andersen, the auditor, did not find out. 
+
+I was very excited when I knew there are tens of thousands of emails and detailed financial data for top executives, which I have never heard or thought about before. By playing around with these datasets, I can become a detective, my dreamy job when I was a kid after watching a lot Case Closed, to identify person of interest. Machine learning will be very helpful to identifying who is involved in this scandal. 
+
+In this project, I will apply what I my machine learning knowledge in this project to build up algorithms to find out who were involved in the scandle, meaning they were indicted, reached a settlement or plea deal with the government, or testified in exchange for prosecution immunity.
+
+There are 146 rows in the dataset, with 18 POI and 128 Non-POI. There are 21 features in total, and a lot of them have missing values. There are two outliers that  I identified and removed: 'Total' and 'the travel agency in the park'. 
+
+The detailed information and codes can be found in the notebook.
+
+## Question 2:
+
+### Features Creation
+I added three more features that I think will help with the analysis.
+
+* bonus_salary ratio
+* from_this_person_to_poi_percentage
+* from_poi_to_this_person_percentage
+
+Bonus and salary ratio can help identify who received suspicious bonuses compared to their salary. Unexpected high bonuses could mean POI. Also, if a person had a very high amount of emails and communication with POI, this person is more likely to be a POI.
+
+ ### Features Scaling
+ I did use feature scaling. The three features I created are percentage, which is, as expected, significantly smaller than dollar amounts, like salary and bonus. Many algorithms, such as SVM, doesn't work well when features are not under the same or similar range. Therefore, features scaling is necessary for the analysis.
+ 
+ I used `SelectKBest()` to choose the features. I provided several choices to `GridSearchCV` and let it find the best features. The final algorithms I used is decision tree. It chose all the features. 
+ 
+ ## Question 3
+ 
+ I used several different algorithms.
+ 
+ * GaussianNB: This is a very basic one, and I used it as a baseline. Therefore, I didn't tune it.
+ * Decision Tree: This ends up being the best choice.
+ * KNN: It is a very simple yet effective algorithms. It has a good precision rate: 60%, but a low recall rate: 20%.
+ * SVM: It doesn't work well in this dataset since this dataset is skewed, with only a few POIs.
+ * Random Forest & Adaboost: They are very effective algorithms, but it takes a lot of time training them. 
+
+
+## Question 4
+
+Tuning the parameters of an algorithm means adjustment the parameters to achieve a better performance. There are various adjustments can be made, depending on what algorithm to be tuned. 
+
+I used the combination of `GridSearchCV`. 
+
+Take the decision tree algorithm as an example, I adjusted the `min_samples_split` to be either 2, 3, or 5. I adjusted the `min_samples_leaf` to be either 1, 2, or 3.  `GridSearchCV` will choose the best combination of these two parameters based on the training dataset. 
+
+## Question 5
+
+Validation is a way to testify the algorithm's performance. It is a common mistake that people may test the algorithm using the training dataset. Without separating the training set from the testing set, it is difficult to determine how well your algorithm generalizes to new data.
+
+I split my original dataset into 80% training and 20% testing sets.
+
+I then used the 80% training sets to tune my algorithms. I also used the `StratifiedShuffleSplit` for cross validation, meaning there will be multiple small training and testing set within the big training set. It will gauge my algorithm's performance. 
+
+### Question 6
+
+* Precision is that, within all the POI we predicts, how many of them are real POI
+* Recall is that, within all the known POI, how many are actually predicted by us
+
+The two rates are better evolution method the accurate rate when the dataset is skewed (one class has significant more amounts than the other)
+
+My KNN algorithm has precision rate of 0.61847 and	recall rate of 0.25450. It means that, 60% of the POI we predicted are real POI, and we only find out 25% of the real POI.
+
+Since my decision tree magically has 100% recall and precision rate. It is the final model I choose.  
