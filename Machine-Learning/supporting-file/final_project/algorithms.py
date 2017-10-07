@@ -9,9 +9,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn import tree
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
-from sklearn.decomposition import PCA
 
 
 data = featureFormat(enron_dataset, features_list, sort_keys = True)

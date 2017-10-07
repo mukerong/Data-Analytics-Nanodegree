@@ -1,21 +1,29 @@
 #!/usr/bin/python
 
 import sys
-import pickle
 sys.path.append("../tools/")
-
+import pickle
+from collections import defaultdict
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from collections import defaultdict
 from feature_format import featureFormat, targetFeatureSplit
-from tester import dump_classifier_and_data
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_selection import SelectKBest, SelectPercentile
-from sklearn.model_selection import train_test_split, KFold, GridSearchCV
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-from sklearn import tree
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import AdaBoostClassifier
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.feature_selection import SelectKBest
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedShuffleSplit
+from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
-from sklearn.decomposition import PCA
+from tester import test_classifier
+
+%matplotlib inline
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -34,8 +42,13 @@ for _, value in data_dict.items():
         features_list.append(k)
     break
 
+features_list.remove('poi')
+features_list.insert(0, 'poi')
+features_list.remove('email_address')
+
 ### Task 2: Remove outliers
 data_dict.pop('TOTAL', 0)
+data_dict.pop('THE TRAVEL AGENCY IN THE PARK',0)
 
 ### Task 3: Create new feature(s) and append to features list
 ### Store to enron_dataset for easy export below.
@@ -67,11 +80,58 @@ for employee, features in data_dict.items():
         features['from_poi_to_this_person_percentage'] = "NaN"
 features_list.append('from_poi_to_this_person_percentage')
 
+
+# Since there are a lot of missing values hidden in the dataset, I will
+# use the mean toe replace NaN.
+email_features = ['to_messages',
+                  'from_poi_to_this_person',
+                  'from_poi_to_this_person_percentage',
+                  'from_messages',
+                  'from_this_person_to_poi',
+                  'from_this_person_to_poi_percentage',
+                  'shared_receipt_with_poi']
+
+
+email_feature_sums = defaultdict(lambda:0)
+email_feature_counts = defaultdict(lambda:0)
+
+for employee, features in data_dict.iteritems():
+    for feature in email_features:
+        if features[feature] != "NaN":
+            email_feature_sums[feature] += features[feature]
+            email_feature_counts[feature] += 1
+
+email_feature_means = {}
+for feature in email_features:
+    email_feature_means[feature] = float(email_feature_sums[feature]) / float(email_feature_counts[feature])
+
+for employee, features in data_dict.iteritems():
+    for feature in email_features:
+        if features[feature] == "NaN":
+            features[feature] = email_feature_means[feature]
+
+
 enron_dataset = data_dict
+
 
 ### Extract features and labels from dataset for local testing
 data = featureFormat(enron_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
+
+features_train, features_test, labels_train, labels_test = \
+    train_test_split(features, labels, test_size=0.2, random_state=42)
+
+scaler = MinMaxScaler()
+features_train_std = scaler.fit_transform(features_train)
+features_test_std = scaler.transform(features_test)
+
+select = SelectKBest()
+
+cv = StratifiedShuffleSplit(
+    n_splits = 100,
+    test_size = 0.3,
+    random_state = 6
+    )
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -81,6 +141,11 @@ labels, features = targetFeatureSplit(data)
 
 # Provided to give you a starting point. Try a variety of classifiers.
 
+'''
+I will try several different classifiers here. Detials will all under task 5.
+'''
+
+
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall
 ### using our testing script. Check the tester.py script in the final project
 ### folder for details on the evaluation method, especially the test_classifier
@@ -89,116 +154,176 @@ labels, features = targetFeatureSplit(data)
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 # Example starting point. Try investigating other evaluation techniques!
-from sklearn.model_selection import train_test_split
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
-
 
 '''
+# Gassian Naive Bayes (No Tuning)
+
+clf = GaussianNB()
+clf.fit(features_train_std, labels_train)
+pred = clf.predict(features_test_std)
+
+test_classifier(clf, enron_dataset, features_list)
+'''
+
+
 # Decision Tree
-scaler = MinMaxScaler()
-scaler.fit(features_train)
-scaled_features_train = scaler.transform(features_train)
-scaled_features_test = scaler.transform(features_test)
 
-parameters = {'min_samples_split': (2, 5, 10)}
-tree = GridSearchCV(tree.DecisionTreeClassifier(), parameters)
-tree.fit(scaled_features_train, labels_train)
-tree_prediction = tree.predict(scaled_features_test)
-print "decision tree accuracy score: ", \
-    accuracy_score(labels_test, tree_prediction)
-print "decision tree precision_score: ", \
-    precision_score(labels_test, tree_prediction)
-print "decision treere call_score", \
-    recall_score(labels_test, tree_prediction)
-'''
+steps = [
+    ('feature_selection', select),
+    ('tree', DecisionTreeClassifier())
+]
 
-'''
-# Use pipeline to tune SVM
-estimators =[('scaler', MinMaxScaler()),
-             ('feature_selection', SelectKBest()),
-             ('svm', SVC())
-             ]
-pipeline = Pipeline(estimators)
+pipeline = Pipeline(steps)
 
 parameters = {
-    'feature_selection__k': [2, 3, 4, 5, 6, 'all'],
-    'svm__kernel': ['linear', 'rbf'],
-    'svm__C': [0.1, 1, 10, 100, 1000, 10000],
-    'svm__gamma': [0.1, 0.01, 0.001, 0.0001]
+    'feature_selection__k': [5, 6, 7, 8, 'all'],
+    'tree__min_samples_split': [2, 3, 5],
+    'tree__min_samples_leaf': [1, 2, 3]
 }
 
-clf = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',error_score=0)
-clf.fit(features_train, labels_train)
-svc_prediction = clf.predict(features_test)
+grid = GridSearchCV(pipeline, param_grid=parameters, cv=cv, scoring='f1', error_score=0)
+grid.fit(features_train_std, labels_train)
+clf=grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
-print "svc accuracy score: ", \
-    accuracy_score(labels_test, svc_prediction)
-print "svc precision_score: ", \
-    precision_score(labels_test, svc_prediction)
-print "svc recall_score", \
-    recall_score(labels_test, svc_prediction)
-'''
+features_selected = [features_list[i]
+                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+features_selected.insert(0, 'poi')
+
+print test_classifier(clf, enron_dataset, features_selected)
+
+features_list = features_selected
+
+
 
 '''
-# Use pipeline to tune KNN
-estimators = [
-    ('scaler', MinMaxScaler()),
-    ('feature_selection', SelectKBest()),
-    ('knn', KNeighborsClassifier())
+# Random Forest
+steps = [
+    ('feature_selection', select),
+    ('rf', RandomForestClassifier())
 ]
+
+pipeline = Pipeline(steps)
+
+parameters = {
+    'feature_selection__k': [5, 6, 7, 8, 'all'],
+    'rf__n_estimators': [10, 20, 30, 40],
+    'rf__min_samples_split': [2, 5, 10],
+    'rf__criterion': ['gini', 'entropy'],
+    'rf__random_state': [10]
+}
+
+grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',
+    cv=cv, error_score=0)
+
+grid.fit(features_train_std, labels_train)
+
+clf = grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
+
+features_selected = [features_list[i]
+                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+features_selected.insert(0, 'poi')
+
+print test_classifier(clf, enron_dataset, features_selected)
+
+features_list = features_selected
+'''
+
+'''
+# SVM
+estimators =[
+             ('feature_selection', SelectKBest()),
+             ('svm', SVC())
+]
+
 pipeline = Pipeline(estimators)
 
 parameters = {
-    'feature_selection__k': [2, 3, 4, 5, 6, 'all'],
-    'knn__n_neighbors': [1, 2, 3, 4, 5],
-    'knn__leaf_size': [1, 10, 30, 60],
+    'feature_selection__k': [4, 5, 6, 7, 'all'],
+    'svm__kernel': ['linear', 'rbf'],
+    'svm__C': [0.001, 0.01, 0.1, 1, 3],
+    'svm__gamma': [0.001, 0.01, 0.1]
+}
+
+grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',
+    cv=cv, error_score=0)
+
+grid.fit(features_train_std, labels_train)
+
+clf = grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
+
+features_selected = [features_list[i]
+                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+features_selected.insert(0, 'poi')
+
+print test_classifier(clf, enron_dataset, features_selected)
+
+features_list = features_selected
+'''
+
+'''
+# KNN
+estimators = [
+    ('feature_selection', select),
+    ('knn', KNeighborsClassifier())
+]
+
+pipeline = Pipeline(estimators)
+
+parameters = {
+    'feature_selection__k': [4, 5, 6, 7, 'all'],
+    'knn__n_neighbors': [2, 3, 4, 5],
+    'knn__leaf_size': [1, 10, 20, 30],
     'knn__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
 }
 
-clf = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',error_score=0)
-clf.fit(features_train, labels_train)
-knn_prediction = clf.predict(features_test)
+grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=cv, error_score=0)
+grid.fit(features_train_std, labels_train)
 
-print "knn accuracy score: ", \
-    accuracy_score(labels_test, knn_prediction)
-print "knn precision_score: ", \
-    precision_score(labels_test, knn_prediction)
-print "knn recall_score", \
-    recall_score(labels_test, knn_prediction)
+clf = grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
+
+features_selected = [features_list[i]
+                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+features_selected.insert(0, 'poi')
+
+print test_classifier(clf, enron_dataset, features_selected)
+
+features_list = features_selected
 '''
 
-# Use KFold and AdaBoost
+'''
+# AdaBoost
 estimators = [
-    ('scaler', MinMaxScaler()),
-    ('feature_selection', SelectKBest()),
-    ('adaboost', AdaBoostClassifier())
+    ('feature_selection', select),
+    ('adb', AdaBoostClassifier())
 ]
+
 pipeline = Pipeline(estimators)
 
 parameters = {
-    'feature_selection__k': [2, 3, 4, 5, 6, 'all'],
-    'adaboost__n_estimators': [10, 50, 100],
-    'adaboost__learning_rate': [1, 5, 10],
-    'adaboost__algorithm': ['SAMME', 'SAMME.R']
+    'feature_selection__k': [3, 4, 5, 6, 7, 'all'],
+    'adb__n_estimators': [10, 50, 100],
+    'adb__learning_rate': [0.001, 0.01, 0.1, 1, 2],
+    'adb__algorithm': ['SAMME', 'SAMME.R']
 }
 
-kfold = KFold(n_splits=3, shuffle=True)
+grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=cv, error_score=0)
+grid.fit(features_train_std, labels_train)
 
-gs = GridSearchCV(pipeline, param_grid=parameters,
-                   scoring='f1',error_score=0, cv=kfold)
+clf = grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
-gs.fit(features, labels)
-clf = gs.best_estimator_
-adaboost_prediction = clf.predict(features_test)
+features_selected = [features_list[i]
+                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+features_selected.insert(0, 'poi')
 
-print "adaboost accuracy score: ", \
-    accuracy_score(labels_test, adaboost_prediction)
-print "adaboost precision_score: ", \
-    precision_score(labels_test, adaboost_prediction)
-print "adaboost recall_score", \
-    recall_score(labels_test, adaboost_prediction)
+print test_classifier(clf, enron_dataset, features_selected)
 
+features_list = features_selected
+'''
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
