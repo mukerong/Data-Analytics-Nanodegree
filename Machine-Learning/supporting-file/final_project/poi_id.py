@@ -23,8 +23,6 @@ from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
 from tester import test_classifier
 
-%matplotlib inline
-
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
