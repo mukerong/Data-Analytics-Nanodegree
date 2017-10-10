@@ -69,7 +69,7 @@ Tuning the parameters of an algorithm means adjustment the parameters to achieve
 
 I used `GridSearchCV` for tuning parameters. 
 
-Take the KNN as an example. I want to try the n_neighbors to be `[2, 5, 10, 20]`. In this example, the KNN will first try to predict the new point to POI depends on the two nearby data point. Then, it tries to predict using nearby 5 points, and so on. With `GridSearchCV`, the classifier will know which option has a higher `f1` score, and choose it. In my example, it is 
+Take the KNN as an example. I want to try the n_neighbors to be `[2, 5, 10, 20]`. In this example, the KNN will first try to predict the new point to POI depends on the two nearby data point. Then, it tries to predict using nearby 5 points, and so on. With `GridSearchCV`, the classifier will know which option has a higher `f1` score, and choose it. In my example, it is 2.
 
 ## Question 5
 
