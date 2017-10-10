@@ -1,0 +1,278 @@
+# IL Financial Contributions to 2016 Presidential Campaigns
+========================================================
+
+## Abstract
+
+This is an exploration data analysis on IL 2016 US presidential campaign
+contribution.
+
+The dataset can be found [here](http://classic.fec.gov/disclosurep/PDownload.do)
+
+Here is the list of variables contained in this file:
+
+* cmte_id
+* cand_id           
+* cand_nm
+* contbr_nm         
+* contbr_city       
+* contbr_st        
+* contbr_zip        
+* contbr_employer
+* contbr_occupation
+* contb_receipt_amt
+* contb_receipt_dt
+* receipt_desc"     
+* memo_cd           
+* memo_text         
+* form_tp        
+* file_num          
+* tran_id
+* election_tp
+
+When I first get this dataset, and scan through it. Here are some questions I immediately have. I will try to answer these questions during the exploration.
+I will see if there are additional questions I can answer when I play around 
+with the data.
+
+* Which candidate receives the most money?
+* Which candidate has the most supporters?
+* Who donates the highest amount of money?
+* What do the donors do?
+* How do these donors donate?
+
+## Setup
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+
+```
+
+## Initial Data Exploration
+
+```{r echo=FALSE, Load_the_Data}
+
+il <- read_csv('contribution-data-IL.csv')
+
+dim(il)
+str(il)
+names(il)
+
+```
+
+This is a big dataset, with 250k rows of data, and 18 variables. 
+
+## Univariate Plots Section
+
+### Receipt Amount Info
+
+Let's take a quick look at the summary of this information.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+summary(il$contb_receipt_amt)
+
+```
+
+As you can seen in the summary. There are a lot of outliers in this dataset.
+Most donation is between 0 to 100. Unexpectedly, there are some negative
+donations as well. Details cannot be shown clearly in the orginal histogram.
+Therefore, I am going to add some transformation to this plot.
+
+```{r echo=FALSE, Univariate_Plots}
+
+ggplot(data=il, aes(x=contb_receipt_amt)) +
+    geom_histogram(bins=50) +
+    scale_x_log10()
+
+```
+
+We can see the trends of this dataset more clearly right now. However, there is
+a potential issue. Since the dataset contains several negative contributions, 
+which doesnt' work well with log10. In my analysis, I will omit these negative
+amount since they are refund when the contribution exceeds the [limits](https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/contribution-limits-candidates/). They are not very helpful for my analysis.
+Based on the warning messages, around 3k rows are removed, which is around 1%
+of the total dataset. 
+
+### Candidate Info
+
+```{r echo=FALSE, Univariate_Plots}
+
+table(il$cand_nm)
+
+ggplot(aes(x = cand_nm), data = il) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('candidate') +
+    ylab('# of Donations')
+
+```
+
+We can clearly see that Hillary Clinton has the highest amount of supporters.
+Sanders is on the second spot, roughly 1/2 of Clinton. Donald Trump is the third
+one, rougly 1/5 of Clinton. 
+
+### Contributor Occupation
+
+The contributor's occupation information is not clean. Based on a quick summary
+of this part of data, the name of occupation is not consistent. There are a lot
+of occupation with only 1 contributor. Therefore, to better understand it, I
+will only focus on the top 10 occupations.
+
+```{r echo=FALSE, Univariate_Plots}
+occupation_group <- group_by(il, contbr_occupation)
+
+il_by_occupation <- summarize(occupation_group,
+                              sum_occupation = sum(contb_receipt_amt),
+                              mean_occupation = mean(contb_receipt_amt),
+                              n = n())
+
+il_by_occupation <- subset(il_by_occupation,
+                           contbr_occupation != "INFORMATION REQUESTED")
+
+il_by_occupation <- head(arrange(il_by_occupation, desc(n)), n = 10)
+
+il_by_occupation$contbr_occupation
+
+il_by_occupation$contbr_occupation <-
+    ordered(il_by_occupation$contbr_occupation,
+            levels = c('RETIRED', "NOT EMPLOYED", "ATTORNEY", "TEACHER",
+                       "PROFESSOR", "PHYSICIAN", "HOMEMAKER", "CONSULTANT",
+                       "SALES", "LAWYER"))
+
+ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=n)) +
+    geom_bar(stat = 'identity') +
+    theme(axis.text.x = element_text(angle=90, hjust=1))
+
+il_by_occupation$contbr_occupation <-
+    ordered(il_by_occupation$contbr_occupation,
+            levels = c('RETIRED', "NOT EMPLOYED", "ATTORNEY", "TEACHER",
+                       "PROFESSOR", "PHYSICIAN", "HOMEMAKER", "CONSULTANT",
+                       "SALES", "LAWYER"))
+
+ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
+    geom_bar(stat = 'identity') +
+    
+
+```
+
+Based on a quick summary for the contribution information, 
+
+## Univariate Analysis
+
+### What is the structure of your dataset?
+
+
+
+### What is/are the main feature(s) of interest in your dataset?
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+
+## Bivariate Plots Section
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+## Bivariate Analysis
+
+> **Tip**: As before, summarize what you found in your bivariate explorations
+here. Use the questions below to guide your discussion.
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+## Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the \
+strengths and limitations of your model.
+
+------
+
+## Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. What were some of the struggles that you went through?
+What went well? What was surprising? Make sure you include an insight into
+future work that could be done with the dataset.
+
+> **Tip**: Don't forget to remove this, and the other **Tip** sections before
+saving your final work and knitting the final report!
