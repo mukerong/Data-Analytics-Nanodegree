@@ -222,7 +222,7 @@ scores = clf.named_steps['feature_selection'].scores_
 importances = clf.named_steps['tree'].feature_importances_
 
 indices = np.argsort(importances)[::-1]
-for i in range(len(feature_selected)):
+for i in range(len(features_selected)):
     print "Feature No. {}: {}, importance: ({})".format(i+1,
                                                 features_selected[indices[i]],
                                                 importances[indices[i]])
