@@ -21,7 +21,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
-from tester import test_classifier
+from tester import test_classifier, dump_classifier_and_data
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -47,6 +47,19 @@ features_list.remove('email_address')
 ### Task 2: Remove outliers
 data_dict.pop('TOTAL', 0)
 data_dict.pop('THE TRAVEL AGENCY IN THE PARK',0)
+
+# Check the current score:
+
+data = featureFormat(data_dict, features_list, sort_keys = True)
+labels, features = targetFeatureSplit(data)
+
+scaler = MinMaxScaler()
+features_std = scaler.fit_transform(features)
+
+clf = GaussianNB()
+clf.fit(features, labels)
+
+test_classifier(clf, data_dict, features_list)
 
 ### Task 3: Create new feature(s) and append to features list
 ### Store to enron_dataset for easy export below.
@@ -78,6 +91,18 @@ for employee, features in data_dict.items():
         features['from_poi_to_this_person_percentage'] = "NaN"
 features_list.append('from_poi_to_this_person_percentage')
 
+# Check scores again with new features
+
+data = featureFormat(data_dict, features_list, sort_keys = True)
+labels, features = targetFeatureSplit(data)
+
+scaler = MinMaxScaler()
+features_std = scaler.fit_transform(features)
+
+clf = GaussianNB()
+clf.fit(features, labels)
+
+test_classifier(clf, data_dict, features_list)
 
 # Since there are a lot of missing values hidden in the dataset, I will
 # use the mean toe replace NaN.
@@ -108,7 +133,21 @@ for employee, features in data_dict.iteritems():
         if features[feature] == "NaN":
             features[feature] = email_feature_means[feature]
 
+# Check the score after updating the data:
 
+data = featureFormat(data_dict, features_list, sort_keys = True)
+labels, features = targetFeatureSplit(data)
+
+scaler = MinMaxScaler()
+features_std = scaler.fit_transform(features)
+
+clf = GaussianNB()
+clf.fit(features, labels)
+
+test_classifier(clf, data_dict, features_list)
+
+
+# Copy the original dataset into another one for future analysis
 enron_dataset = data_dict
 
 
@@ -116,12 +155,8 @@ enron_dataset = data_dict
 data = featureFormat(enron_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.2, random_state=42)
-
 scaler = MinMaxScaler()
-features_train_std = scaler.fit_transform(features_train)
-features_test_std = scaler.transform(features_test)
+features_std = scaler.fit_transform(features)
 
 select = SelectKBest()
 
@@ -153,16 +188,6 @@ I will try several different classifiers here. Detials will all under task 5.
 
 # Example starting point. Try investigating other evaluation techniques!
 
-'''
-# Gassian Naive Bayes (No Tuning)
-
-clf = GaussianNB()
-clf.fit(features_train_std, labels_train)
-pred = clf.predict(features_test_std)
-
-test_classifier(clf, enron_dataset, features_list)
-'''
-
 
 # Decision Tree
 
@@ -174,92 +199,17 @@ steps = [
 pipeline = Pipeline(steps)
 
 parameters = {
-    'feature_selection__k': [5, 6, 7, 8, 'all'],
+    'feature_selection__k': [5, 10, 15, 'all'],
     'tree__min_samples_split': [2, 3, 5],
     'tree__min_samples_leaf': [1, 2, 3]
 }
 
 grid = GridSearchCV(pipeline, param_grid=parameters, cv=cv, scoring='f1', error_score=0)
-grid.fit(features_train_std, labels_train)
+grid.fit(features_std, labels)
 clf=grid.best_estimator_
 print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
-features_selected = [features_list[i]
-                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
-features_selected.insert(0, 'poi')
-
-print test_classifier(clf, enron_dataset, features_selected)
-
-features_list = features_selected
-
-
-
-'''
-# Random Forest
-steps = [
-    ('feature_selection', select),
-    ('rf', RandomForestClassifier())
-]
-
-pipeline = Pipeline(steps)
-
-parameters = {
-    'feature_selection__k': [5, 6, 7, 8, 'all'],
-    'rf__n_estimators': [10, 20, 30, 40],
-    'rf__min_samples_split': [2, 5, 10],
-    'rf__criterion': ['gini', 'entropy'],
-    'rf__random_state': [10]
-}
-
-grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',
-    cv=cv, error_score=0)
-
-grid.fit(features_train_std, labels_train)
-
-clf = grid.best_estimator_
-print "\n", "Best parameters are: ", grid.best_params_, "\n"
-
-features_selected = [features_list[i]
-                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
-features_selected.insert(0, 'poi')
-
-print test_classifier(clf, enron_dataset, features_selected)
-
-features_list = features_selected
-'''
-
-'''
-# SVM
-estimators =[
-             ('feature_selection', SelectKBest()),
-             ('svm', SVC())
-]
-
-pipeline = Pipeline(estimators)
-
-parameters = {
-    'feature_selection__k': [4, 5, 6, 7, 'all'],
-    'svm__kernel': ['linear', 'rbf'],
-    'svm__C': [0.001, 0.01, 0.1, 1, 3],
-    'svm__gamma': [0.001, 0.01, 0.1]
-}
-
-grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',
-    cv=cv, error_score=0)
-
-grid.fit(features_train_std, labels_train)
-
-clf = grid.best_estimator_
-print "\n", "Best parameters are: ", grid.best_params_, "\n"
-
-features_selected = [features_list[i]
-                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
-features_selected.insert(0, 'poi')
-
-print test_classifier(clf, enron_dataset, features_selected)
-
-features_list = features_selected
-'''
+print test_classifier(clf, enron_dataset, features_list)
 
 '''
 # KNN
@@ -271,25 +221,46 @@ estimators = [
 pipeline = Pipeline(estimators)
 
 parameters = {
-    'feature_selection__k': [4, 5, 6, 7, 'all'],
+    'feature_selection__k': [5, 10, 15, 'all'],
     'knn__n_neighbors': [2, 3, 4, 5],
     'knn__leaf_size': [1, 10, 20, 30],
     'knn__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
 }
 
 grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=cv, error_score=0)
-grid.fit(features_train_std, labels_train)
+grid.fit(features_std, labels)
 
 clf = grid.best_estimator_
 print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
-features_selected = [features_list[i]
-                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
-features_selected.insert(0, 'poi')
+print test_classifier(clf, enron_dataset, features_list)
+'''
 
-print test_classifier(clf, enron_dataset, features_selected)
+'''
+# Random Forest
+steps = [
+    ('feature_selection', select),
+    ('rf', RandomForestClassifier())
+]
 
-features_list = features_selected
+pipeline = Pipeline(steps)
+
+parameters = {
+    'feature_selection__k': [5, 10, 15, 'all'],
+    'rf__n_estimators': [10, 20, 30, 40],
+    'rf__min_samples_split': [2, 5, 10],
+    'rf__criterion': ['gini', 'entropy'],
+    'rf__random_state': [10]
+}
+
+grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1',
+    cv=cv, error_score=0)
+grid.fit(features_std, labels)
+
+clf = grid.best_estimator_
+print "\n", "Best parameters are: ", grid.best_params_, "\n"
+
+print test_classifier(clf, enron_dataset, features_list)
 '''
 
 '''
@@ -302,25 +273,19 @@ estimators = [
 pipeline = Pipeline(estimators)
 
 parameters = {
-    'feature_selection__k': [3, 4, 5, 6, 7, 'all'],
+    'feature_selection__k': [5, 10, 15, 'all'],
     'adb__n_estimators': [10, 50, 100],
     'adb__learning_rate': [0.001, 0.01, 0.1, 1, 2],
     'adb__algorithm': ['SAMME', 'SAMME.R']
 }
 
 grid = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=cv, error_score=0)
-grid.fit(features_train_std, labels_train)
+grid.fit(features_std, labels)
 
 clf = grid.best_estimator_
 print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
-features_selected = [features_list[i]
-                     for i in clf.named_steps['feature_selection'].get_support(indices=True)]
-features_selected.insert(0, 'poi')
-
-print test_classifier(clf, enron_dataset, features_selected)
-
-features_list = features_selected
+print test_classifier(clf, enron_dataset, features_list)
 '''
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
