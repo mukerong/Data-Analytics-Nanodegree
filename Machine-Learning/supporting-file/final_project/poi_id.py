@@ -211,6 +211,22 @@ print "\n", "Best parameters are: ", grid.best_params_, "\n"
 
 print test_classifier(clf, enron_dataset, features_list)
 
+clf.named_steps['tree'].feature_importances_
+
+# Check what features have been selected
+features_selected = \
+[features_list[i+1]
+ for i in clf.named_steps['feature_selection'].get_support(indices=True)]
+
+scores = clf.named_steps['feature_selection'].scores_
+importances = clf.named_steps['tree'].feature_importances_
+
+indices = np.argsort(importances)[::-1]
+for i in range(len(feature_selected)):
+    print "Feature No. {}: {}, importance: ({})".format(i+1,
+                                                features_selected[indices[i]],
+                                                importances[indices[i]])
+
 '''
 # KNN
 estimators = [
@@ -222,7 +238,7 @@ pipeline = Pipeline(estimators)
 
 parameters = {
     'feature_selection__k': [5, 10, 15, 'all'],
-    'knn__n_neighbors': [2, 3, 4, 5],
+    'knn__n_neighbors': [2, 5, 10, 20],
     'knn__leaf_size': [1, 10, 20, 30],
     'knn__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
 }
