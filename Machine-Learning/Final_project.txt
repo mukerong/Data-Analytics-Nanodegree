@@ -23,6 +23,30 @@ I added three more features that I think will help with the analysis.
 
 Bonus and salary ratio can help identify who received suspicious bonuses compared to their salary. Unexpected high bonuses could mean POI. Also, if a person had a very high amount of emails and communication with POI, this person is more likely to be a POI.
 
+I have run a untuned `GassianNB` classifier to quickly see the rate changes after adding the new features. To my surprise, the new features don't really improve the score. Both get precision score of 0.22604 and recall score of 0.39500I think this is because the new features are created based on the other features. They are co-related. GaussianNB doesn't work very well with inter-related features. 
+
+On the contract, by filling up the missing email-related value by mean, the rate actually increases, with precision score of 0.23177	 and recall score of 0.39100. I will keep the new features for future analysis, but I will apply some feature selection algorithms to select the most important features. 
+
+My final model is decision tree. Using the decision tree importances attribute, we can see that one of the new features is the 3rd important one. Two new features have been picked.
+
+```
+Feature No. 1: exercised_stock_options, importance: (0.349672566372)
+Feature No. 2: long_term_incentive, importance: (0.148644911504)
+Feature No. 3: from_this_person_to_poi_percentage, importance: (0.119373696662)
+Feature No. 4: shared_receipt_with_poi, importance: (0.107024336283)
+Feature No. 5: other, importance: (0.0654037610619)
+Feature No. 6: total_stock_value, importance: (0.0594579646018)
+Feature No. 7: expenses, importance: (0.0475663716814)
+Feature No. 8: total_payments, importance: (0.0475663716814)
+Feature No. 9: restricted_stock, importance: (0.0323364803294)
+Feature No. 10: from_poi_to_this_person, importance: (0.022953539823)
+Feature No. 11: deferred_income, importance: (0.0)
+Feature No. 12: from_messages, importance: (0.0)
+Feature No. 13: loan_advances, importance: (0.0)
+Feature No. 14: bonus, importance: (0.0)
+Feature No. 15: salary, importance: (0.0)
+```
+
  ### Features Scaling
  I did use feature scaling. The three features I created are percentage, which is, as expected, significantly smaller than dollar amounts, like salary and bonus. Many algorithms, such as SVM, doesn't work well when features are not under the same or similar range. Therefore, features scaling is necessary for the analysis.
  
@@ -41,11 +65,11 @@ Bonus and salary ratio can help identify who received suspicious bonuses compare
 
 ## Question 4
 
-Tuning the parameters of an algorithm means adjustment the parameters to achieve a better performance. There are various adjustments can be made, depending on what algorithm to be tuned. 
+Tuning the parameters of an algorithm means adjustment the parameters to achieve a better performance. There are various adjustments can be made, depending on what algorithm to be tuned. Tuning parameters are very important since there are many adjustable parameters under different algorithms. For example, in KNN, we can choose how many data points should be used for prediction. It is very hard to tell unless we tried each of them. By tuning parameters, we can let the algorithms try different parameters, and find the one that is best for the current dataset.
 
-I used the combination of `GridSearchCV`. 
+I used `GridSearchCV` for tuning parameters. 
 
-Take the decision tree algorithm as an example, I adjusted the `min_samples_split` to be either 2, 3, or 5. I adjusted the `min_samples_leaf` to be either 1, 2, or 3.  `GridSearchCV` will choose the best combination of these two parameters based on the training dataset. 
+Take the KNN as an example. I want to try the n_neighbors to be `[2, 5, 10, 20]`. In this example, the KNN will first try to predict the new point to POI depends on the two nearby data point. Then, it tries to predict using nearby 5 points, and so on. With `GridSearchCV`, the classifier will know which option has a higher `f1` score, and choose it. In my example, it is 
 
 ## Question 5
 
