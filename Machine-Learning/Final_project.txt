@@ -1,6 +1,6 @@
 # Identify Fraud from Enron Email
 
-## Question 1:
+## Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?
 
 Enron scandal is one of the most famous scandals in the world. Because of the fraud, Enron went bankrupt in 2002. I heard and learnt a lot about it since day one in business school. During that time, all I learnt was about how did they cheat on their financial statement, but why Arthur Andersen, the auditor, did not find out. 
 
@@ -10,24 +10,21 @@ In this project, I will apply what I my machine learning knowledge in this proje
 
 There are 146 rows in the dataset, with 18 POI and 128 Non-POI. There are 21 features in total, and a lot of them have missing values. There are two outliers that  I identified and removed: 'Total' and 'the travel agency in the park'. 
 
-The detailed information and codes can be found in the notebook.
 
-## Question 2:
+## What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values. 
 
 ### Features Creation
 I added three more features that I think will help with the analysis.
 
-* bonus_salary ratio
-* from_this_person_to_poi_percentage
-* from_poi_to_this_person_percentage
+* bonus_salary ratio - help identify who received suspicious bonuses compared to their salary. Unexpected high bonuses could mean POI. Current features cannot provide this kind of information 
+* from_this_person_to_poi_percentage - if a person had a very high amount of emails and communication with POI, this person is more likely to be a POI. Just the email amounts is not very informative since some people generally send more emails than the other.
+* from_poi_to_this_person_percentage - if a person had a very high amount of emails and communication with POI, this person is more likely to be a POI. Just the email amounts is not very informative since some people generally send more emails than the other.
 
-Bonus and salary ratio can help identify who received suspicious bonuses compared to their salary. Unexpected high bonuses could mean POI. Also, if a person had a very high amount of emails and communication with POI, this person is more likely to be a POI.
-
-I have run a untuned `GassianNB` classifier to quickly see the rate changes after adding the new features. To my surprise, the new features don't really improve the score. Both get precision score of 0.22604 and recall score of 0.39500I think this is because the new features are created based on the other features. They are co-related. GaussianNB doesn't work very well with inter-related features. 
+The new features doesn't seems to be very important in GaussianNB classifier. I have run a untuned `GaussianNB` classifier to quickly see the rate changes after adding the new features. To my surprise, the new features don't really improve the score. Both get precision score of 0.22604 and recall score of 0.39500. I think this is because the new features are created based on the other features. They are co-related. GaussianNB doesn't work very well with inter-related features. 
 
 On the contract, by filling up the missing email-related value by mean, the rate actually increases, with precision score of 0.23177	 and recall score of 0.39100. I will keep the new features for future analysis, but I will apply some feature selection algorithms to select the most important features. 
 
-My final model is decision tree. Using the decision tree importances attribute, we can see that one of the new features is the 3rd important one. Two new features have been picked.
+Later, I tuned a decision tree algorithm, and generated the features that are important. It seems that `from_this_person_to_poi_percentage` and `from_poi_to_this_person` are two important features. They ranked No. 3 and No. 10, respectively. 
 
 ```
 Feature No. 1: exercised_stock_options, importance: (0.349672566372)
@@ -52,7 +49,29 @@ Feature No. 15: salary, importance: (0.0)
  
  I used `SelectKBest()` to choose the features. I provided several choices to `GridSearchCV` and let it find the best features. The final algorithms I used is decision tree. It chose all the features. 
  
- ## Question 3
+ ### Features Selection
+ 
+ I used `SelectKBest` to let the algorithm choose what works best for the model. I have around 20 features in total, so I chose different k values: 5, 10, 15, and 'all'. I provided the same options for all the algorithms, I used the combination of `Pipeline` and `GridSearchCV` together, so that the algorithm can try all the four options and choose the best one. The final model I choose is the tuned decision tree model, and here are the lists of features it choose. It chooses 15 features in total:
+ 
+ ```
+Feature No. 1: exercised_stock_options, importance: (0.349672566372)
+Feature No. 2: long_term_incentive, importance: (0.148644911504)
+Feature No. 3: from_this_person_to_poi_percentage, importance: (0.119373696662)
+Feature No. 4: shared_receipt_with_poi, importance: (0.107024336283)
+Feature No. 5: other, importance: (0.0654037610619)
+Feature No. 6: total_stock_value, importance: (0.0594579646018)
+Feature No. 7: expenses, importance: (0.0475663716814)
+Feature No. 8: total_payments, importance: (0.0475663716814)
+Feature No. 9: restricted_stock, importance: (0.0323364803294)
+Feature No. 10: from_poi_to_this_person, importance: (0.022953539823)
+Feature No. 11: deferred_income, importance: (0.0)
+Feature No. 12: from_messages, importance: (0.0)
+Feature No. 13: loan_advances, importance: (0.0)
+Feature No. 14: bonus, importance: (0.0)
+Feature No. 15: salary, importance: (0.0)
+``` 
+ 
+ ## What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  
  
  I used several different algorithms.
  
@@ -60,18 +79,27 @@ Feature No. 15: salary, importance: (0.0)
  * Decision Tree: This ends up being the best choice.
  * KNN: It is a very simple yet effective algorithms. It has a good precision rate: 60%, but a low recall rate: 20%.
  * SVM: It doesn't work well in this dataset since this dataset is skewed, with only a few POIs.
- * Random Forest & Adaboost: They are very effective algorithms, but it takes a lot of time training them. 
+ * Random Forest & Adaboost: They are very effective algorithms, but it takes a lot of time training them. Overall, they have more than 50% of accurate rate, but less than 30% of recall rate. This might because the lake of data points in this dataset, which causes overfitting.
 
 
-## Question 4
+## What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  
 
-Tuning the parameters of an algorithm means adjustment the parameters to achieve a better performance. There are various adjustments can be made, depending on what algorithm to be tuned. Tuning parameters are very important since there are many adjustable parameters under different algorithms. For example, in KNN, we can choose how many data points should be used for prediction. It is very hard to tell unless we tried each of them. By tuning parameters, we can let the algorithms try different parameters, and find the one that is best for the current dataset.
+Based on this [answer](https://stackoverflow.com/questions/22903267/what-is-tuning-in-machine-learning)
 
-I used `GridSearchCV` for tuning parameters. 
+> tuning an algorithm or machine learning technique, can be simply thought of as process which one goes through in which they optimize the parameters that impact the model in order to enable the algorithm to perform the best
 
-Take the KNN as an example. I want to try the n_neighbors to be `[2, 5, 10, 20]`. In this example, the KNN will first try to predict the new point to POI depends on the two nearby data point. Then, it tries to predict using nearby 5 points, and so on. With `GridSearchCV`, the classifier will know which option has a higher `f1` score, and choose it. In my example, it is 2.
+With that being said, tuning the parameters of an algorithm means adjustment the parameters to achieve a better performance. Without ding so, an algorithm cannot be as powerful as it is supposed to be. It will face high variance & high bias issues. The final accurate & f1 score can be very low.
 
-## Question 5
+There are various adjustments can be made, depending on what algorithm to be tuned. Tuning parameters are very important since there are many adjustable parameters under different algorithms. For example, in KNN, we can choose how many data points should be used for prediction. It is very hard to tell unless we tried each of them. By tuning parameters, we can let the algorithms try different parameters, and find the one that is best for the current dataset.
+
+I used `GridSearchCV` for tuning parameters. Take the KNN algorithm I tuned as an example. I tried the n_neighbors to be `[2, 5, 10, 20]`. I included `'knn__n_neighbors': [2, 5, 10, 20]` in the parameters that pass to `GridSearchCV`. I tuned other parameters as well:
+
+* 'knn__leaf_size': [1, 10, 20, 30]
+* 'knn__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
+
+Take the `knn__n_neighbors` as an example. The KNN will first try to predict the new point to POI depends on the two nearby data point. Then, it tries to predict using nearby 5 points, and so on. It will compare the `f1` score of these options, and choose the one with the highest score. In my example, it chooses 2.
+
+## What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis? 
 
 Validation is a way to testify the algorithm's performance. It is a common mistake that people may test the algorithm using the training dataset. Without separating the training set from the testing set, it is difficult to determine how well your algorithm generalizes to new data.
 
@@ -79,7 +107,7 @@ I split my original dataset into 80% training and 20% testing sets.
 
 I then used the 80% training sets to tune my algorithms. I also used the `StratifiedShuffleSplit` for cross validation, meaning there will be multiple small training and testing set within the big training set. It will gauge my algorithm's performance. 
 
-### Question 6
+### Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance.
 
 * Precision is that, within all the POI we predicts, how many of them are real POI
 * Recall is that, within all the known POI, how many are actually predicted by us
