@@ -46,7 +46,8 @@ with the data.
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
-
+library(readr)
+ 
 ```
 
 ## Initial Data Exploration
@@ -145,25 +146,25 @@ ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=n)) +
     geom_bar(stat = 'identity') +
     theme(axis.text.x = element_text(angle=90, hjust=1))
 
+il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
+
 il_by_occupation$contbr_occupation <-
     ordered(il_by_occupation$contbr_occupation,
-            levels = c('RETIRED', "NOT EMPLOYED", "ATTORNEY", "TEACHER",
-                       "PROFESSOR", "PHYSICIAN", "HOMEMAKER", "CONSULTANT",
-                       "SALES", "LAWYER"))
+            levels = c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
+                       'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
 
 ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
     geom_bar(stat = 'identity') +
-    
-
+    theme(axis.text.x = element_text(angle=90, hjust=1))
 ```
 
-Based on a quick summary for the contribution information, 
+Based on a quick summary for the contribution information, we can see that retired people are more involved in the presidential campaign, following by non-employed people. However, from an average contribution perspective, attorney has the highest average contribution, following by lawyer and homemaker, whose average contribution is almost the same. Non-employed people have the lowest average contribution. 
 
 ## Univariate Analysis
 
 ### What is the structure of your dataset?
 
-
+This dataset has 250,411 observations, and 18 variables (features). 
 
 ### What is/are the main feature(s) of interest in your dataset?
 
