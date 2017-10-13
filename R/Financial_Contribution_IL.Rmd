@@ -85,7 +85,9 @@ Therefore, I am going to add some transformation to this plot.
 
 ggplot(data=il, aes(x=contb_receipt_amt)) +
     geom_histogram(bins=50) +
-    scale_x_log10()
+    scale_x_log10() +
+    xlab('contribution amount') +
+    ggtitle('Contribution Amount Distribution')
 
 ```
 
@@ -106,7 +108,8 @@ ggplot(aes(x = cand_nm), data = il) +
     geom_bar() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     xlab('candidate') +
-    ylab('# of Donations')
+    ylab('# of Donations') +
+    ggtitle('# of Donation per Candidate')
 
 ```
 
@@ -144,41 +147,108 @@ il_by_occupation$contbr_occupation <-
 
 ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=n)) +
     geom_bar(stat = 'identity') +
-    theme(axis.text.x = element_text(angle=90, hjust=1))
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('Occupation') +
+    ylab('Count') +
+    ggtitle('# of Contribution per Occupation')
 
 il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
 
 il_by_occupation$contbr_occupation <-
     ordered(il_by_occupation$contbr_occupation,
-            levels = c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
-                       'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
+            levels = 
+                c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
+                'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
 
 ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
     geom_bar(stat = 'identity') +
-    theme(axis.text.x = element_text(angle=90, hjust=1))
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('Occupation') +
+    ylab('Average Contribution Amount') +
+    ggtitle('Average Contribution per Occupation')
+
 ```
 
-Based on a quick summary for the contribution information, we can see that retired people are more involved in the presidential campaign, following by non-employed people. However, from an average contribution perspective, attorney has the highest average contribution, following by lawyer and homemaker, whose average contribution is almost the same. Non-employed people have the lowest average contribution. 
+Based on a quick summary for the contribution information, we can see that
+retired people are more involved in the presidential campaign, following by
+non-employed people. However, from an average contribution perspective,
+attorney has the highest average contribution, following by lawyer and
+homemaker, whose average contribution is almost the same. Non-employed people
+have the lowest average contribution. 
+
+### Party
+
+The dataset doesn't have the party information of all the candidates. I will
+create the party variable based on my understanding of each candidate. 
+
+```{r echo=FALSE, Univariate_Plots}
+
+unique(il$cand_nm)
+
+democrat <- c("Clinton, Hillary Rodham", "Sanders, Bernard", "O'Malley,
+              Martin Joseph", "Lessig, Lawrence", "Webb, James Henry Jr.")
+others <- c("Johnson, Gary", "McMullin, Evan", "Stein, Jill")
+il$party <- ifelse(il$cand_nm %in% democrat, "democrat",
+                   ifelse(il$cand_nm %in% others, "others", "republican"))
+
+party_group <- group_by(il, party)
+il.contr_by_party <- summarize(party_group,
+                               sum_party = sum(contb_receipt_amt),
+                               number_of_candidate = length(unique(cand_nm)), 
+                               mean_party = sum_party/number_of_candidate, 
+                               n = n()) 
+                              
+il.contr_by_party
+il.contr_by_party$party <- ordered(il.contr_by_party$party, 
+                                   levels = c('democrat', 'republican', 'others'))
+
+ggplot(data = il.contr_by_party, aes(x = party, y = n, fill = party)) +
+  geom_bar(stat = 'identity') +
+  geom_text(stat = 'identity', aes(label = n),
+            data = il.contr_by_party, vjust = -0.4) +
+  xlab('Party') +
+  ylab('# of Contributions') +
+  ggtitle('# of Contributions by Party') +
+  scale_fill_manual(values = c('dark blue', 'red', 'green'))
+
+```
+
 
 ## Univariate Analysis
 
 ### What is the structure of your dataset?
 
-This dataset has 250,411 observations, and 18 variables (features). 
+This dataset has 250,411 observations, and 18 variables (features). The detail
+list of the all the variables can be found in the Abstract section.
+The features I am most interested in this datasets are the candidates and the
+amount they received.
+
 
 ### What is/are the main feature(s) of interest in your dataset?
+
+I am mainly interested in the contribution amount, who is contributing and how
+much each candidate received. I will try to answer the questions in the abstract
+section.
 
 ### What other features in the dataset do you think will help support your \
 investigation into your feature(s) of interest?
 
-
+The occupation is the feature that can help support my investigation. As the
+plots showing above, the average of contribution amount varies a lot among
+different occupations.
 
 ### Did you create any new variables from existing variables in the dataset?
+
+There is only candidate name and id information instead of party information,
+which is an important factor when analyzing presidential campaign. Therefore,
+I created a "party" variable using the candidate name.
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
 
+As mentioned above, I omitted the negative contribution, which is the refund
+amount that exceeds the $2,700 limitation.
 
 ## Bivariate Plots Section
 
@@ -189,6 +259,8 @@ supporting variables. Try to look at relationships between supporting variables
 as well.
 
 ```{r echo=FALSE, Bivariate_Plots}
+
+
 
 ```
 
