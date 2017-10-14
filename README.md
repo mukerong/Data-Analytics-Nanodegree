@@ -20,4 +20,4 @@ Most of the projects will use [Python](https://www.python.org) and [R](https://w
 
 ## Certificate
 
-![Data Analysis Nanodegree](https://github.com/rachelfu/Udacity-DAND/blob/master/DAND-Certificate.pdf)
+![Data Analysis Nanodegree](hhttps://github.com/rachelfu/Udacity-DAND/blob/master/DAND-Certificate.jpg)
