@@ -10,7 +10,7 @@ I am a CPA with two-year experience in public accounting. I am paasionate about 
 
 This program will include organizing data, uncovering patterns and insights, making predictions with machine learning, and clearly communicating critical findings.
 
-### Prerequisites 
+### Prerequisites
 
 Most of the projects will use [Python](https://www.python.org) and [R](https://www.r-project.org/about.html). You can download [Anaconda](https://www.continuum.io/downloads) and [RStudio](https://www.rstudio.com)
 
@@ -18,3 +18,6 @@ Most of the projects will use [Python](https://www.python.org) and [R](https://w
 
 * Guanrong Fu
 
+## Certificate
+
+![Data Analysis Nanodegree](~/github/Udacity-dand/DAND-Certificate.pdf)
