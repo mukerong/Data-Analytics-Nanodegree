@@ -67,7 +67,7 @@ This is a big dataset, with 250k rows of data, and 18 variables.
 
 ## Univariate Plots Section
 
-### Receipt Amount Info
+### Contribution Amount Info
 
 Let's take a quick look at the summary of this information.
 
@@ -77,12 +77,22 @@ summary(il$contb_receipt_amt)
 
 ```
 
-As you can seen in the summary. There are a lot of outliers in this dataset. \
-Most donation is between 0 to 100. Unexpectedly, there are some negative \
-donations as well. Details cannot be shown clearly in the orginal histogram. \
-Therefore, I am going to add some transformation to this plot.
-
 ```{r echo=FALSE, warning=FALSE, Univariate_Plots1}
+
+ggplot(data=il, aes(x=contb_receipt_amt)) +
+    geom_histogram(bins=50) +
+    xlab('contribution amount') +
+    ggtitle('Contribution Amount Distribution')
+
+```
+
+As you can seen in the plots and summary,there are a lot of outliers in this \
+dataset. Most donation are grouped together with several outliers. \
+Unexpectedly, there are some negative donations as well. Details cannot be \
+shown clearly in the orginal plots without transformation. Therefore, I am \
+going to add some transformation to this plot.
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots2}
 
 ggplot(data=il, aes(x=contb_receipt_amt)) +
     geom_histogram(bins=50) +
@@ -97,11 +107,44 @@ is a potential issue. Since the dataset contains several negative \
 contributions, which doesnt' work well with log10. In my analysis, I will omit \
 these negative amount since they are refund when the contribution exceeds the [limits](https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/contribution-limits-candidates/). They are not very helpful for my analysis. \
 Based on the warning messages, around 3k rows are removed, which is around 1% \
-of the total dataset. 
+of the total dataset.
+
+Since I am more interested in the contribution between 0 to 2700. I will remove
+them from the dataframe.
+
+```{r echo=FALSE, warning=FALSE}
+il <- subset(il, il$contb_receipt_amt > 0 & il$contb_receipt_amt <= 2700)
+
+summary(il)
+```
+
+Let's see the distribution right now.
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots3}
+
+ggplot(data=il, aes(x=contb_receipt_amt)) +
+    geom_histogram(bins=50) +
+    xlab('contribution amount') +
+    ggtitle('Contribution Amount Distribution')
+
+```
+
+It is very clear that there are several outliers, which is higher than $500. \
+Let's do the transformation.
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots4}
+
+ggplot(data=il, aes(x=contb_receipt_amt)) +
+    geom_histogram(bins=50) +
+    scale_x_log10() +
+    xlab('contribution amount') +
+    ggtitle('Contribution Amount Distribution')
+
+```
 
 ### Candidate Info
 
-```{r echo=FALSE, warning=FALSE, Univariate_Plots2}
+```{r echo=FALSE, warning=FALSE, Univariate_Plots5}
 
 table(il$cand_nm)
 
@@ -125,7 +168,7 @@ of this part of data, the name of occupation is not consistent. There are a lot
 of occupation with only 1 contributor. Therefore, to better understand it, I
 will only focus on the top 10 occupations.
 
-```{r echo=FALSE, warning=FALSE, Univariate_Plots3}
+```{r echo=FALSE, warning=FALSE, Univariate_Plots6}
 occupation_group <- group_by(il, contbr_occupation)
 
 il_by_occupation <- summarize(occupation_group,
@@ -159,12 +202,27 @@ Based on a quick summary for the contribution information, we can see that
 retired people are more involved in the presidential campaign, following by
 non-employed people. 
 
+### Contribution Date
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots7}
+
+il$contb_receipt_dt <- as.Date(il$contb_receipt_dt, "%d-%b-%y")
+il <- il[order(as.Date(il$contb_receipt_dt)),]
+
+ggplot(data = il, aes(x = contb_receipt_dt)) +
+    geom_histogram(bins = 50)
+
+```
+
+The contribution does not increase with the time, There are two low point in \
+2016.
+
 ### Party
 
 The dataset doesn't have the party information of all the candidates. I will
 create the party variable based on my understanding of each candidate. 
 
-```{r echo=FALSE, warning=FALSE, Univariate_Plots4}
+```{r echo=FALSE, warning=FALSE, Univariate_Plots8}
 
 unique(il$cand_nm)
 
@@ -185,17 +243,40 @@ il_contr_by_party
 il_contr_by_party$party <- ordered(il_contr_by_party$party, 
                                    levels = c('democrat', 'republican', 'others'))
 
-ggplot(data = il_contr_by_party, aes(x = party, y = n, fill = party)) +
+ggplot(data = il_contr_by_party, aes(x = party, y = n)) +
   geom_bar(stat = 'identity') +
   geom_text(stat = 'identity', aes(label = n),
             data = il_contr_by_party, vjust = -0.4) +
   xlab('Party') +
   ylab('# of Contributions') +
-  ggtitle('# of Contributions by Party') +
-  scale_fill_manual(values = c('dark blue', 'red', 'green'))
+  ggtitle('# of Contributions by Party')
 
 ```
 
+### Contribution City
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots9}
+
+city_group <- group_by(il, contbr_city)
+
+il_by_city <- summarize(city_group,
+                              sum_city = sum(contb_receipt_amt),
+                              mean_city = mean(contb_receipt_amt),
+                              n = n())
+
+il_by_city <- head(arrange(il_by_city, desc(n)), n = 10)
+
+ggplot(data = il_by_city, aes(x = contbr_city, y = n)) +
+    geom_bar(stat = 'identity') +
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('City') +
+    ylab('Count') +
+    ggtitle('# of Contribution per City')
+
+```
+
+People in Chicago are much more involved in the contribution campaign than \
+any other cities in Illinois.
 
 ## Univariate Analysis
 
@@ -289,15 +370,14 @@ take a look at the contribution amount per party right now.
 ```{r echo=FALSE, warning=FALSE, Bivariate_Plots3}
 
 ggplot(data = il_contr_by_party, 
-       aes(x = party, y = sum_party/1000, fill = party)) +
+       aes(x = party, y = sum_party/1000)) +
     geom_bar(stat = 'identity') +
     geom_text(data = il_contr_by_party, stat = 'identity',
               aes(label = round(sum_party/1000)),
               vjust = -0.5) +
     xlab('Party') +
     ylab('Contribution Amount (k)') +
-    ggtitle('Total Contribution Amount per Party') +
-    scale_fill_manual(values = c('dark blue', 'red', 'green'))
+    ggtitle('Total Contribution Amount per Party')
 
 subset(il_contr_by_party, party == 'democrat')$sum_party /
     sum(il_contr_by_party$sum_party)
@@ -310,8 +390,7 @@ received. Other parties receive very small amounts. Domocracy recevied almost \
 
 ```{r echo=FALSE, warning=FALSE, Bivariate_Plots4}
 
-ggplot(data = il_contr_by_party, aes(x = party, y =  mean_party/1000, 
-                                     fill = party)) +
+ggplot(data = il_contr_by_party, aes(x = party, y =  mean_party/1000, )) +
     geom_bar(stat = 'identity') +
     xlab('Party') +
     ylab('Contribution Amount (k)') +
@@ -345,6 +424,34 @@ sum(subset(il, cand_nm == 'Clinton, Hillary Rodham')$contb_receipt_amt) /
 
 Unsurprisingly, Hillary Clinton received the highest contribution amount, \
 60% of the total contribution.
+
+### Contribution & City
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots6}
+
+ggplot(data = il_by_city, aes(x = contbr_city, y = sum_city/1000)) +
+    geom_bar(stat = 'identity') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('City') +
+    ylab('Total Contribution Amount (k)') +
+    ggtitle('Total Contribution per City')
+
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots7}
+
+ggplot(data = il_by_city, aes(x = contbr_city, y = mean_city)) +
+    geom_bar(stat = 'identity') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('City') +
+    ylab('Average Contribution Amount') +
+    ggtitle('Average Contribution per City')
+
+```
+
+This is interesting. Although Chicago has the highest total amount, it does \
+have the highest average contribution. Wilmette and Highland Park has higher \
+average contribution.
 
 ## Bivariate Analysis
 
@@ -386,13 +493,6 @@ il_top_candidate <- il %>%
   filter(cand_nm %in% top_candidate) %>%
   group_by(cand_nm, contb_receipt_dt) %>%
   summarize(n = n(), total = sum(contb_receipt_amt))
-
-il_top_candidate$contb_receipt_dt <-
-    as.Date(il_top_candidate$contb_receipt_dt, "%d-%b-%y")
-
-il_top_candidate[order(as.Date(
-    il_top_candidate$contb_receipt_dt, format="%m/%y")),]
-
 
 ggplot(data = il_top_candidate,
     aes(x = contb_receipt_dt, y = total, color = cand_nm)) +
@@ -482,13 +582,6 @@ il_top_candidate <- il %>%
   filter(cand_nm %in% top_candidate) %>%
   group_by(cand_nm, contb_receipt_dt) %>%
   summarize(n = n(), total = sum(contb_receipt_amt))
-
-il_top_candidate$contb_receipt_dt <-
-    as.Date(il_top_candidate$contb_receipt_dt, "%d-%b-%y")
-
-il_top_candidate[order(as.Date(
-    il_top_candidate$contb_receipt_dt, format="%m/%y")),]
-
 
 ggplot(data = il_top_candidate,
     aes(x = contb_receipt_dt, y = total, color = cand_nm)) +
