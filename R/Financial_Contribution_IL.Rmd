@@ -82,7 +82,7 @@ Most donation is between 0 to 100. Unexpectedly, there are some negative \
 donations as well. Details cannot be shown clearly in the orginal histogram. \
 Therefore, I am going to add some transformation to this plot.
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, Univariate_Plots1}
 
 ggplot(data=il, aes(x=contb_receipt_amt)) +
     geom_histogram(bins=50) +
@@ -101,7 +101,7 @@ of the total dataset.
 
 ### Candidate Info
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, Univariate_Plots2}
 
 table(il$cand_nm)
 
@@ -125,7 +125,7 @@ of this part of data, the name of occupation is not consistent. There are a lot
 of occupation with only 1 contributor. Therefore, to better understand it, I
 will only focus on the top 10 occupations.
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, Univariate_Plots3}
 occupation_group <- group_by(il, contbr_occupation)
 
 il_by_occupation <- summarize(occupation_group,
@@ -164,7 +164,7 @@ non-employed people.
 The dataset doesn't have the party information of all the candidates. I will
 create the party variable based on my understanding of each candidate. 
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, Univariate_Plots4}
 
 unique(il$cand_nm)
 
@@ -237,7 +237,7 @@ amount that exceeds the $2,700 limitation.
 
 ### Occupation & Contribution Amount
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, Bivariate_Plots1}
 il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
 
 il_by_occupation$contbr_occupation <-
@@ -259,7 +259,7 @@ attorney has the highest average contribution, following by lawyer and
 homemaker, whose average contribution is almost the same. Non-employed people
 have the lowest average contribution. 
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, Bivariate_Plots2}
 
 il_by_occupation <- head(arrange(il_by_occupation, desc(sum_occupation)),
                          n = 10)
@@ -286,7 +286,7 @@ ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=sum_occupation)) +
 We have seen the # of contribution per party in the previous exploration. Let's
 take a look at the contribution amount per party right now.
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, Bivariate_Plots3}
 
 ggplot(data = il_contr_by_party, 
        aes(x = party, y = sum_party/1000, fill = party)) +
@@ -308,7 +308,7 @@ There is no surprise here. Democracy still receives twice as much as republican
 received. Other parties receive very small amounts. Domocracy recevied almost \
 70% of the total contribution.
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, Bivariate_Plots4}
 
 ggplot(data = il_contr_by_party, aes(x = party, y =  mean_party/1000, 
                                      fill = party)) +
@@ -328,7 +328,7 @@ the contribution as much as republican received.
 
 ### Candidate & Contribution Amount
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, Bivariate_Plots5}
 sort(with(il, by(contb_receipt_amt, cand_nm, sum)))
 
 ggplot(data = il, aes(x = cand_nm, y = contb_receipt_amt/1000)) +
@@ -431,7 +431,7 @@ than Hillary Clinton.
 ## Final Plots and Summary
 
 ### Plot One: Most people contribution $100 or less
-```{r echo=FALSE, Plot_Two}
+```{r echo=FALSE, Plot_One}
 
 ggplot(data=il, aes(x=contb_receipt_amt)) +
     geom_histogram(bins=50) +
@@ -448,7 +448,7 @@ thousands of dollars. To my surprise, most people donate $100 or less. Later, \
 I noticed that there are acutally $2,700 contribution limitation.
 
 ### Plot Two: Attorney has the highest average contribution
-```{r echo=FALSE, Plot_One}
+```{r echo=FALSE, Plot_Two}
 il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
 
 il_by_occupation$contbr_occupation <-
