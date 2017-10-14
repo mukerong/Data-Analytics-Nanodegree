@@ -29,8 +29,9 @@ Here is the list of variables contained in this file:
 * tran_id
 * election_tp
 
-When I first get this dataset, and scan through it. Here are some questions I immediately have. I will try to answer these questions during the exploration.
-I will see if there are additional questions I can answer when I play around 
+When I first get this dataset, and scan through it. Here are some questions I \
+immediately have. I will try to answer these questions during the exploration. \
+I will see if there are additional questions I can answer when I play around \
 with the data.
 
 * Which candidate receives the most money?
@@ -76,9 +77,9 @@ summary(il$contb_receipt_amt)
 
 ```
 
-As you can seen in the summary. There are a lot of outliers in this dataset.
-Most donation is between 0 to 100. Unexpectedly, there are some negative
-donations as well. Details cannot be shown clearly in the orginal histogram.
+As you can seen in the summary. There are a lot of outliers in this dataset. \
+Most donation is between 0 to 100. Unexpectedly, there are some negative \
+donations as well. Details cannot be shown clearly in the orginal histogram. \
 Therefore, I am going to add some transformation to this plot.
 
 ```{r echo=FALSE, Univariate_Plots}
@@ -91,11 +92,11 @@ ggplot(data=il, aes(x=contb_receipt_amt)) +
 
 ```
 
-We can see the trends of this dataset more clearly right now. However, there is
-a potential issue. Since the dataset contains several negative contributions, 
-which doesnt' work well with log10. In my analysis, I will omit these negative
-amount since they are refund when the contribution exceeds the [limits](https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/contribution-limits-candidates/). They are not very helpful for my analysis.
-Based on the warning messages, around 3k rows are removed, which is around 1%
+We can see the trends of this dataset more clearly right now. However, there \
+is a potential issue. Since the dataset contains several negative \
+contributions, which doesnt' work well with log10. In my analysis, I will omit \
+these negative amount since they are refund when the contribution exceeds the [limits](https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/contribution-limits-candidates/). They are not very helpful for my analysis. \
+Based on the warning messages, around 3k rows are removed, which is around 1% \
 of the total dataset. 
 
 ### Candidate Info
@@ -113,7 +114,7 @@ ggplot(aes(x = cand_nm), data = il) +
 
 ```
 
-We can clearly see that Hillary Clinton has the highest amount of supporters.
+We can clearly see that Hillary Clinton has the highest amount of supporters. \
 Sanders is on the second spot, roughly 1/2 of Clinton. Donald Trump is the third
 one, rougly 1/5 of Clinton. 
 
@@ -152,29 +153,11 @@ ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=n)) +
     ylab('Count') +
     ggtitle('# of Contribution per Occupation')
 
-il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
-
-il_by_occupation$contbr_occupation <-
-    ordered(il_by_occupation$contbr_occupation,
-            levels = 
-                c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
-                'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
-
-ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
-    geom_bar(stat = 'identity') +
-    theme(axis.text.x = element_text(angle=90, hjust=1)) +
-    xlab('Occupation') +
-    ylab('Average Contribution Amount') +
-    ggtitle('Average Contribution per Occupation')
-
 ```
 
 Based on a quick summary for the contribution information, we can see that
 retired people are more involved in the presidential campaign, following by
-non-employed people. However, from an average contribution perspective,
-attorney has the highest average contribution, following by lawyer and
-homemaker, whose average contribution is almost the same. Non-employed people
-have the lowest average contribution. 
+non-employed people. 
 
 ### Party
 
@@ -192,20 +175,20 @@ il$party <- ifelse(il$cand_nm %in% democrat, "democrat",
                    ifelse(il$cand_nm %in% others, "others", "republican"))
 
 party_group <- group_by(il, party)
-il.contr_by_party <- summarize(party_group,
+il_contr_by_party <- summarize(party_group,
                                sum_party = sum(contb_receipt_amt),
                                number_of_candidate = length(unique(cand_nm)), 
                                mean_party = sum_party/number_of_candidate, 
                                n = n()) 
                               
-il.contr_by_party
-il.contr_by_party$party <- ordered(il.contr_by_party$party, 
+il_contr_by_party
+il_contr_by_party$party <- ordered(il_contr_by_party$party, 
                                    levels = c('democrat', 'republican', 'others'))
 
-ggplot(data = il.contr_by_party, aes(x = party, y = n, fill = party)) +
+ggplot(data = il_contr_by_party, aes(x = party, y = n, fill = party)) +
   geom_bar(stat = 'identity') +
   geom_text(stat = 'identity', aes(label = n),
-            data = il.contr_by_party, vjust = -0.4) +
+            data = il_contr_by_party, vjust = -0.4) +
   xlab('Party') +
   ylab('# of Contributions') +
   ggtitle('# of Contributions by Party') +
@@ -252,45 +235,178 @@ amount that exceeds the $2,700 limitation.
 
 ## Bivariate Plots Section
 
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
+### Occupation & Contribution Amount
+
+```{r echo=FALSE, Bivariate_Plots}
+il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
+
+il_by_occupation$contbr_occupation <-
+    ordered(il_by_occupation$contbr_occupation,
+            levels = 
+                c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
+                'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
+
+ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
+    geom_bar(stat = 'identity') +
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('Occupation') +
+    ylab('Average Contribution Amount') +
+    ggtitle('Average Contribution per Occupation')
+```
+
+As discussed above, retired and non-employed people are more involved in the presidential campaign. However, from an average contribution perspective,
+attorney has the highest average contribution, following by lawyer and
+homemaker, whose average contribution is almost the same. Non-employed people
+have the lowest average contribution. 
 
 ```{r echo=FALSE, Bivariate_Plots}
 
+il_by_occupation <- head(arrange(il_by_occupation, desc(sum_occupation)),
+                         n = 10)
+il_by_occupation
 
+il_by_occupation$contbr_occupation <-
+    ordered(il_by_occupation$contbr_occupation,
+            levels = 
+                c('RETIRED', 'ATTORNEY', 'HOMEMAKER', 'NOT EMPLOYED',
+                  'PHYSICIAN', 'LAWYER', 'CONSULTANT', "PROFESSOR", "TEACHER",
+                  'SALES'))
+
+ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=sum_occupation)) +
+    geom_bar(stat = 'identity') +
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('Occupation') +
+    ylab('Average Contribution Amount') +
+    ggtitle('Average Contribution per Occupation')
 
 ```
 
-## Bivariate Analysis
+### Party & Contribution Amount
 
-> **Tip**: As before, summarize what you found in your bivariate explorations
-here. Use the questions below to guide your discussion.
+We have seen the # of contribution per party in the previous exploration. Let's
+take a look at the contribution amount per party right now.
+
+```{r echo=FALSE, Bivariate_Plots}
+
+ggplot(data = il_contr_by_party, 
+       aes(x = party, y = sum_party/1000, fill = party)) +
+    geom_bar(stat = 'identity') +
+    geom_text(data = il_contr_by_party, stat = 'identity',
+              aes(label = round(sum_party/1000)),
+              vjust = -0.5) +
+    xlab('Party') +
+    ylab('Contribution Amount (k)') +
+    ggtitle('Total Contribution Amount per Party') +
+    scale_fill_manual(values = c('dark blue', 'red', 'green'))
+
+subset(il_contr_by_party, party == 'democrat')$sum_party /
+    sum(il_contr_by_party$sum_party)
+
+```
+
+There is no surprise here. Democracy still receives twice as much as republican
+received. Other parties receive very small amounts. Domocracy recevied almost \
+70% of the total contribution.
+
+```{r echo=FALSE, Bivariate_Plots}
+
+ggplot(data = il_contr_by_party, aes(x = party, y =  mean_party/1000, 
+                                     fill = party)) +
+    geom_bar(stat = 'identity') +
+    xlab('Party') +
+    ylab('Contribution Amount (k)') +
+    ggtitle('Average Contribution per Party') +
+    scale_fill_manual(values = c('dark blue', 'red', 'green'))
+
+subset(il_contr_by_party, party == 'democrat')$mean_party /
+    subset(il_contr_by_party, party == 'republican')$mean_party
+
+```
+
+There are even more differences here. Democracy received more than 9 times of
+the contribution as much as republican received. 
+
+### Candidate & Contribution Amount
+
+```{r echo=FALSE, Bivariate_Plots}
+sort(with(il, by(contb_receipt_amt, cand_nm, sum)))
+
+ggplot(data = il, aes(x = cand_nm, y = contb_receipt_amt/1000)) +
+    geom_bar(stat = 'identity') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('Candidate') +
+    ylab('Total Contribution Amount (k)') +
+    ggtitle('Total Contribution per Candidate')
+
+sum(subset(il, cand_nm == 'Clinton, Hillary Rodham')$contb_receipt_amt) /
+    sum(il$contb_receipt_amt)
+
+```
+
+Unsurprisingly, Hillary Clinton received the highest contribution amount, \
+60% of the total contribution.
+
+## Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+* Although in terms of total amount of people, retired people and unemployed \
+people are more involved in the presidential campaign, in terms of average \
+contribution, attorney, laywer and homemakers are the lead. 
+* In Illinois, Democracy received 68% of the total contribution, with only 5 \
+Democracy candidates and 17 Republican candidates.
+* The average amount received by Democracy is more than 9 times of what \
+Republican received.
+* Hillary Clinton alone received 57% of the total contribution.
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+Homemakers have the average contribution almost the same with lawyers. They \
+have the 3rd highest average contribution in Illinois.
+
+I did really know there is a big difference between attorney and lawyer. \
+However, just from the contribution perspective, attorneys are more involved, \
+and contribute more than lawyers.
+
 ### What was the strongest relationship you found?
 
+In Illinois, people support Democracy more, especially Hillary Cliton. 
 
 ## Multivariate Plots Section
 
-> **Tip**: Now it's time to put everything together. Based on what you found in
-the bivariate plots section, create a few multivariate plots to investigate
-more complex interactions between variables. Make sure that the plots that you
-create here are justified by the plots you explored in the previous section. If
-you plan on creating any mathematical models, this is the section where you
-will do that.
-
 ```{r echo=FALSE, Multivariate_Plots}
 
+top_candidate <- c('Clinton, Hillary Rodham', 'Sanders, Bernard',
+                   'Trump, Donald J.')
+
+il_top_candidate <- il %>%
+  filter(cand_nm %in% top_candidate) %>%
+  group_by(cand_nm, contb_receipt_dt) %>%
+  summarize(n = n(), total = sum(contb_receipt_amt))
+
+il_top_candidate$contb_receipt_dt <-
+    as.Date(il_top_candidate$contb_receipt_dt, "%d-%b-%y")
+
+il_top_candidate[order(as.Date(
+    il_top_candidate$contb_receipt_dt, format="%m/%y")),]
+
+
+ggplot(data = il_top_candidate,
+    aes(x = contb_receipt_dt, y = total, color = cand_nm)) +
+        geom_jitter() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('Date') +
+    ylab('Total Contribution') +
+    ggtitle('Total Contribution per Candidate per Month')
+
 ```
+
+We can see, from this plot, that Hiliary Clinton leads the total contribution \
+amount. Bernard Sanders has more contribution from 2015 to 2016. Donald Trump \
+has few contributions at the beginning, but starts to get more since 2016.
 
 # Multivariate Analysis
 
@@ -298,54 +414,114 @@ will do that.
 investigation. Were there features that strengthened each other in terms of \
 looking at your feature(s) of interest?
 
+* Hiliary Clinton leads the total contribution amount all the time. She \
+received more contributions towards the end of the campaign.
+* Bernard Sanders has more contribution from 2015 to 2016, but almost none at \
+the end of the campaign.
+* Donald Trump has few contributions at the beginning, but starts to get more \
+since 2016.
+
 ### Were there any interesting or surprising interactions between features?
 
-### OPTIONAL: Did you create any models with your dataset? Discuss the \
-strengths and limitations of your model.
+For a very short period of time, Bernard Sanders received more contributions \
+than Hillary Clinton.
 
 ------
 
 ## Final Plots and Summary
 
-> **Tip**: You've done a lot of exploration and have built up an understanding
-of the structure of and relationships between the variables in your dataset.
-Here, you will select three plots from all of your previous exploration to
-present here as a summary of some of your most interesting findings. Make sure
-that you have refined your selected plots for good titling, axis labels (with
-units), and good aesthetic choices (e.g. color, transparency). After each plot,
-make sure you justify why you chose each plot by describing what it shows.
+### Plot One: Most people contribution $100 or less
+```{r echo=FALSE, Plot_Two}
 
-### Plot One
-```{r echo=FALSE, Plot_One}
-
+ggplot(data=il, aes(x=contb_receipt_amt)) +
+    geom_histogram(bins=50) +
+    scale_x_log10() +
+    xlab('contribution amount') +
+    ggtitle('Contribution Amount Distribution')
 ```
 
 ### Description One
 
+I am not very familiar with the presidential campaign. When I first saw the \
+dataset, I thought I could find people who was very crazy and would donate \
+thousands of dollars. To my surprise, most people donate $100 or less. Later, \
+I noticed that there are acutally $2,700 contribution limitation.
 
-### Plot Two
-```{r echo=FALSE, Plot_Two}
+### Plot Two: Attorney has the highest average contribution
+```{r echo=FALSE, Plot_One}
+il_by_occupation[with(il_by_occupation, order(mean_occupation)), ]
 
+il_by_occupation$contbr_occupation <-
+    ordered(il_by_occupation$contbr_occupation,
+            levels = 
+                c('ATTORNEY', 'LAWYER', 'HOMEMAKER', 'PHYSICIAN', 'CONSULTANT',
+                'RETIRED', "PROFESSOR", 'SALES', "TEACHER", "NOT EMPLOYED"))
+
+ggplot(data=il_by_occupation, aes(x=contbr_occupation, y=mean_occupation)) +
+    geom_bar(stat = 'identity') +
+    theme(axis.text.x = element_text(angle=90, hjust=1)) +
+    xlab('Occupation') +
+    ylab('Average Contribution Amount') +
+    ggtitle('Average Contribution per Occupation')
 ```
 
 ### Description Two
 
+As discussed above, retired and non-employed people are more involved in the presidential campaign. However, from an average contribution perspective,
+attorney has the highest average contribution, following by lawyer and
+homemaker, whose average contribution is almost the same. Non-employed people
+have the lowest average contribution. 
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 
+top_candidate <- c('Clinton, Hillary Rodham', 'Sanders, Bernard',
+                   'Trump, Donald J.')
+
+il_top_candidate <- il %>%
+  filter(cand_nm %in% top_candidate) %>%
+  group_by(cand_nm, contb_receipt_dt) %>%
+  summarize(n = n(), total = sum(contb_receipt_amt))
+
+il_top_candidate$contb_receipt_dt <-
+    as.Date(il_top_candidate$contb_receipt_dt, "%d-%b-%y")
+
+il_top_candidate[order(as.Date(
+    il_top_candidate$contb_receipt_dt, format="%m/%y")),]
+
+
+ggplot(data = il_top_candidate,
+    aes(x = contb_receipt_dt, y = total, color = cand_nm)) +
+        geom_jitter() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab('Date') +
+    ylab('Total Contribution') +
+    ggtitle('Total Contribution per Candidate per Month')
 ```
 
 ### Description Three
+
+We can see, from this plot, that Hiliary Clinton leads the total contribution \
+amount. Bernard Sanders has more contribution from 2015 to 2016. Donald Trump \
+has few contributions at the beginning, but starts to get more since 2016.
 
 ------
 
 # Reflection
 
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset.
+## Challenages & Struggles
 
-> **Tip**: Don't forget to remove this, and the other **Tip** sections before
-saving your final work and knitting the final report!
+* I actually had some issues reading the dataset at the beginning. I used \
+`read.csv()` at first, but it keeps generating errors. I used \
+`row.names = NULL`, but it generated a row named `NULL` and messed up with \
+the rest of the dataframe. After some research, I used `read_csv()`, which \
+doesn't have any issues. I will use `read_csv()` going forward.
+* I have some struggles with time seires variables in R. In the original \
+dataset, the date information was treaed as characters instead of Date type. \
+It took me a while to clean it up to draw the time seris plot.
+
+## Future Work
+
+This dataset only contains information from Illinois, which is known as the \
+state supports Democracy. I am interesting to explore and analyze the campaign \
+information in other state as well, which could be a total different story.
